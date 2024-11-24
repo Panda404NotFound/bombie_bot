@@ -1,0 +1,58 @@
+[package]
+name = "bombie_bot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+# Сериализация/десериализация
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Асинхронность и работа с futures
+tokio = { version = "1.32", features = ["full"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# Логирование
+log = "0.4"
+env_logger = "0.10"
+
+# Обработка ошибок
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Работа с окружением
+dotenv = "0.15"
+
+# Системные библиотеки
+nix = { version = "0.27", features = ["signal"] }
+glob = "0.3"
+
+# Трейсинг
+tracing = "0.1.40"
+tracing-futures = "0.2.5"
+
+# Python интеграция
+pyo3 = { version = "0.19", features = ["auto-initialize", "abi3-py39"] }
+once_cell = "1.8"
+
+[build-dependencies]
+pyo3-build-config = "0.19"
+which = "4.4"
+
+[profile.dev]
+debug = true
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+debug = false
+debug-assertions = false
+
+[profile.release.package."*"]
+opt-level = 3

@@ -1,0 +1,15 @@
+target/
+**/__pycache__/
+*.pyc
+venv/
+.env
+*.log
+*.session
+.py_session/
+recordings/
+.session
+python_env/
+release/
+backup/
+models/
+Cargo.lock
