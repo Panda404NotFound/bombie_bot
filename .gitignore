@@ -13,3 +13,4 @@ release/
 backup/
 models/
 Cargo.lock
+.DS_Store
