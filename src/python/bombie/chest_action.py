@@ -323,7 +323,7 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена экипировка предмета")
-                await asyncio.sleep(0.7)
+                await HumanBehavior.random_delay()
                 
                 # Проверяем результат экипировки
                 check_image = await self.screen.take_screenshot()
@@ -349,7 +349,7 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена продажа предмета")
-                await asyncio.sleep(0.7)
+                await HumanBehavior.random_delay()
                 
                 # Проверяем результат продажи
                 check_image = await self.screen.take_screenshot()

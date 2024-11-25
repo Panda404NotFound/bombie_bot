@@ -12,8 +12,8 @@ class HumanBehavior:
     
     @staticmethod
     async def random_delay():
-        """Генерирует случайную задержку от 0.250 до 1.250 секунд с возможностью десятичных значений"""
-        delay = round(random.uniform(0.250, 1.250), 3)
+        """Генерирует случайную задержку от 0.450 до 1.050 секунд с возможностью десятичных значений"""
+        delay = round(random.uniform(0.450, 1.050), 3)
         await asyncio.sleep(delay)
         return delay
     

@@ -76,15 +76,15 @@ class CVManager:
                 raise FileNotFoundError(f"Не найдены шаблоны: {', '.join(missing)}")
                 
             # Загрузка шаблонов с проверкой
-            self.true_autosell_template = cv2.imread(str(template_paths['true_autosell_set']), cv2.IMREAD_GRAYSCALE)
-            self.false_autosell_template = cv2.imread(str(template_paths['false_autosell_set']), cv2.IMREAD_GRAYSCALE)
-            self.true_power_template = cv2.imread(str(template_paths['true_power_chest']), cv2.IMREAD_GRAYSCALE)
-            self.false_power_template = cv2.imread(str(template_paths['false_power_chest']), cv2.IMREAD_GRAYSCALE)
-            self.false_auto_skill_template = cv2.imread(str(template_paths['false_auto_skill_button']), cv2.IMREAD_GRAYSCALE)
-            self.true_auto_skill_template = cv2.imread(str(template_paths['true_auto_skill_button']), cv2.IMREAD_GRAYSCALE)
-            self.true_daily_task_rewards_template = cv2.imread(str(template_paths['true_task_action']), cv2.IMREAD_GRAYSCALE)
-            self.false_daily_task_rewards_template = cv2.imread(str(template_paths['false_task_action']), cv2.IMREAD_GRAYSCALE)
-            self.incorrect_equip_choice_template = cv2.imread(str(template_paths['incorrect_equip_choice']), cv2.IMREAD_GRAYSCALE)
+            self.true_autosell_template = cv2.imread(str(template_paths['true_autosell_set']))
+            self.false_autosell_template = cv2.imread(str(template_paths['false_autosell_set']))
+            self.true_power_template = cv2.imread(str(template_paths['true_power_chest']))
+            self.false_power_template = cv2.imread(str(template_paths['false_power_chest']))
+            self.false_auto_skill_template = cv2.imread(str(template_paths['false_auto_skill_button']))
+            self.true_auto_skill_template = cv2.imread(str(template_paths['true_auto_skill_button']))
+            self.true_daily_task_rewards_template = cv2.imread(str(template_paths['true_task_action']))
+            self.false_daily_task_rewards_template = cv2.imread(str(template_paths['false_task_action']))
+            self.incorrect_equip_choice_template = cv2.imread(str(template_paths['incorrect_equip_choice']))
 
             # Проверка загруженных шаблонов
             templates = {
@@ -125,7 +125,7 @@ class CVManager:
         Returns:
             Tuple[np.ndarray, np.ndarray]: Масштабированные шаблоны (template1, template2)
         """
-        img_h, img_w = image.shape[:2]  # Поддержка как grayscale, так и цветных изображений
+        img_h, img_w = image.shape[:2]
         templ_h, templ_w = template1.shape[:2]
         
         if img_h < templ_h or img_w < templ_w:
@@ -143,16 +143,10 @@ class CVManager:
     def find_autosell_checkbox(self, image: np.ndarray) -> bool:
         """Определение состояния чекбокса автопродажи"""
             
-        try:
-            # Конвертируем в grayscale
-            if len(image.shape) == 3:
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = image
-                
+        try:                
             # Проверяем совпадение с обоими шаблонами
-            true_result = cv2.matchTemplate(gray, self.true_autosell_template, cv2.TM_CCOEFF_NORMED)
-            false_result = cv2.matchTemplate(gray, self.false_autosell_template, cv2.TM_CCOEFF_NORMED)
+            true_result = cv2.matchTemplate(image, self.true_autosell_template, cv2.TM_CCOEFF_NORMED)
+            false_result = cv2.matchTemplate(image, self.false_autosell_template, cv2.TM_CCOEFF_NORMED)
             
             true_val = np.max(true_result)
             false_val = np.max(false_result)
@@ -220,23 +214,17 @@ class CVManager:
     def find_auto_skill_button(self, image: np.ndarray) -> bool:
         """Определение состояния кнопки 'Автоскилл'"""
         logger.info("Определение состояния кнопки 'Автоскилл'")
-        try:
-            # Конвертируем в grayscale если изображение цветное
-            if len(image.shape) == 3:
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = image
-                
+        try:                
             # Масштабируем шаблоны если необходимо
             true_template, false_template = self.scale_template_if_needed(
-                gray,
+                image,
                 self.true_auto_skill_template,
                 self.false_auto_skill_template
             )
             
             # Проверяем совпадение с шаблонами
-            true_result = cv2.matchTemplate(gray, true_template, cv2.TM_CCOEFF_NORMED)
-            false_result = cv2.matchTemplate(gray, false_template, cv2.TM_CCOEFF_NORMED)
+            true_result = cv2.matchTemplate(image, true_template, cv2.TM_CCOEFF_NORMED)
+            false_result = cv2.matchTemplate(image, false_template, cv2.TM_CCOEFF_NORMED)
             
             true_val = np.max(true_result)
             false_val = np.max(false_result)
@@ -248,6 +236,12 @@ class CVManager:
             
             # Дополнительная проверка свечения для неактивной кнопки
             if is_enabled:
+                # Конвертируем в grayscale для проверки яркости
+                if len(image.shape) == 3:
+                    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                else:
+                    gray = image
+                    
                 _, bright_mask = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
                 bright_pixels = cv2.countNonZero(bright_mask)
                 has_glow = bright_pixels > (gray.size * 0.1)
@@ -265,22 +259,16 @@ class CVManager:
     def find_daily_task_rewards(self, image: np.ndarray) -> bool:
         """Определение состояния наград в Daily Task"""
         try:
-            # Конвертируем в grayscale если изображение цветное
-            if len(image.shape) == 3:
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = image
-                
             # Масштабируем шаблоны если необходимо
             true_template, false_template = self.scale_template_if_needed(
-                gray,
+                image,
                 self.true_daily_task_rewards_template,
                 self.false_daily_task_rewards_template
             )
             
-            # Проверяем совпадение с шаблонами
-            false_result = cv2.matchTemplate(gray, true_template, cv2.TM_CCOEFF_NORMED)
-            true_result = cv2.matchTemplate(gray, false_template, cv2.TM_CCOEFF_NORMED)
+            # Проверяем совпадение с шаблонами напрямую используя TM_CCOEFF_NORMED
+            true_result = cv2.matchTemplate(image, true_template, cv2.TM_CCOEFF_NORMED)
+            false_result = cv2.matchTemplate(image, false_template, cv2.TM_CCOEFF_NORMED)
             
             true_val = np.max(true_result)
             false_val = np.max(false_result)
@@ -294,7 +282,6 @@ class CVManager:
             # Не знаю насколько эффективная реализация 
             # Как показывает практика, чем выше область изображения, тем эффективнее результат сравнения объекта
 
-            '''
             has_red_indicator = False 
 
             if result:
@@ -321,7 +308,6 @@ class CVManager:
                 result = result and has_red_indicator
                 
             logger.debug(f"Результат проверки наград: {result} (красный индикатор: {has_red_indicator}) (true_val: {true_val}, false_val: {false_val})")
-            '''
 
             return result
                 
@@ -341,21 +327,15 @@ class CVManager:
             bool: True если обнаружено предупреждение, False в противном случае
         """
         try:
-            # Конвертируем в grayscale если изображение цветное
-            if len(image.shape) == 3:
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = image
-                
             # Масштабируем шаблон если необходимо
             scaled_template = self.scale_template_if_needed(
-                gray,
+                image,
                 self.incorrect_equip_choice_template,
                 self.incorrect_equip_choice_template
             )[0]  # Берем первый элемент, так как второй не нужен
             
             # Проверяем совпадение с шаблоном
-            result = cv2.matchTemplate(gray, scaled_template, cv2.TM_CCOEFF_NORMED)
+            result = cv2.matchTemplate(image, scaled_template, cv2.TM_CCOEFF_NORMED)
             match_val = np.max(result)
             
             logger.debug(f"Совпадение предупреждения о некорректном выборе: {match_val:.3f}")
