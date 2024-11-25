@@ -14,8 +14,6 @@ use pyo3::Python;
 use anyhow::anyhow;
 #[allow(unused_imports)]
 use crate::py_modules::py_setup::PythonSetup;
-// #[allow(unused_imports)]
-// use crate::emulation::{initialize_emulation, get_device_metadata, get_device_browser};
 #[allow(unused_imports)]
 use crate::utils::{try_import_package, parse_requirements};
 use std::fs;
@@ -26,6 +24,25 @@ async fn main() -> Result<()> {
     info!("Запуск WebApp Analyzer...");
 
     dotenv().ok();
+
+    // Удаление логов при необходимости
+    if let Err(e) = utils::delete_logs() {
+        error!("Ошибка при удалении логов: {}", e);
+    }
+
+    // Ждем 1 секунду для завершения удаления логов
+    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+
+    // Spawn CTRL+C handler
+    let pid = std::process::id() as i32;
+    tokio::spawn(async move {
+        if let Ok(()) = ctrl_c().await {
+            info!("Получен сигнал Ctrl+C, завершаем работу...");
+            if let Err(e) = signal::kill(Pid::from_raw(pid), Signal::SIGTERM) {
+                error!("Ошибка отправки SIGTERM: {}", e);
+            }
+        }
+    });
 
     // Инициализируем Python окружение
     let python_setup = PythonSetup::new()?;
@@ -61,52 +78,6 @@ async fn main() -> Result<()> {
         }
         Ok(())
     })?;
-
-    // Spawn CTRL+C handler
-    let pid = std::process::id() as i32;
-    tokio::spawn(async move {
-        if let Ok(()) = ctrl_c().await {
-            info!("Получен сигнал Ctrl+C, завершаем работу...");
-            if let Err(e) = signal::kill(Pid::from_raw(pid), Signal::SIGTERM) {
-                error!("Ошибка отправки SIGTERM: {}", e);
-            }
-        }
-    });
-
-    /*
-    // Инициализируем эмуляцию устройств
-    info!("Инициализация эмуляции устройств...");
-    initialize_emulation().await?;
-    info!("Эмуляция устройств успешно инициализирована");
-
-    // Логируем информацию об эмулированных устройствах
-    let devices = ["ios_device", "android_device"];
-    for device_id in devices {
-        log_device_info(device_id).await?;
-    }
-
-    // Получаем метаданные и браузер для устройства
-    let device_id = "android_device";
-    let device_metadata = get_device_metadata(device_id).await?;
-    let browser = get_device_browser(device_id).await?;
-
-    // Регистрируем устройство
-    // let registrar = register::TelegramRegistrar::new(device_metadata.clone(), browser.as_ref().clone())?;
-    // registrar.start_reg().await?;
-
-    // Выполняем вход пользователя
-    // let loging = login::TelegramLogin::new(device_metadata, browser.as_ref().clone())?;
-    // loging.connect().await?;
-
-    // Выполняем вход пользователя и поиск бота
-    // let login = login::TelegramLogin::new(device_metadata, browser.as_ref().clone())?;
-    // login.run_bot_handle().await?;
-
-    // Запускаем Mini App и выполняем вход пользователя
-    let login = login::TelegramLogin::new(device_metadata, browser.as_ref().clone())?;
-    login.start_app().await?;
-
-    */
 
     // Запуск автоматизации
     info!("Запуск автоматизации...");

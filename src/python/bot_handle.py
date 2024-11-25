@@ -8,11 +8,19 @@ from tracer import TracerManager
 from web_modules import GameCanvasHandler
 from device_emulation import get_telegram_device_config
 from bombie.bot_logic import WebAppLogic
+from dotenv import load_dotenv
+import os
+
+# Загрузка переменных окружения
+load_dotenv()
+
+# Получение настроек из .env
+ENABLE_SCREENSHOTS = os.getenv('ENABLE_SCREENSHOTS', 'false').lower() == 'true'
+ENABLE_VIDEO = os.getenv('ENABLE_VIDEO', 'false').lower() == 'true'
+ENABLE_TRACING = os.getenv('ENABLE_TRACING', 'false').lower() == 'true'
+ENABLE_LOGGING = os.getenv('ENABLE_LOGGING', 'true').lower() == 'true'
 
 # Статические настройки
-ENABLE_SCREENSHOTS = False
-ENABLE_VIDEO = False
-ENABLE_TRACING = True
 MAX_RECONNECT_ATTEMPTS = 3
 RECONNECT_DELAY = 5
 
@@ -34,13 +42,14 @@ class BotHandler:
         self.is_running = False
         self.reconnect_attempts = 0
 
-        # Настройка логирования
-        logger.add(
-            "bot_handler.log",
-            rotation="1 day",
-            retention="7 days",
-            level="DEBUG"
-        )
+        # Настройка логирования в зависимости от ENABLE_LOGGING
+        if ENABLE_LOGGING:
+            logger.add(
+                "logs/bot_handler_{time}.log",
+                rotation="1 hour",
+                retention="7 days",
+                level="DEBUG",
+            )
 
     async def check_browser_installation(self):
         """Проверка установки браузера"""
@@ -323,7 +332,7 @@ class BotHandler:
                 # Настройка обработчиков событий WebApp
                 await self._setup_webapp_event_handlers()
                 
-                # Проверяем инициализацию и состояние WebApp
+                # Проверяем инициализацию и состо��ние WebApp
                 init_status = await self.page.evaluate("""
                     () => {
                         const tg = window.Telegram?.WebApp;

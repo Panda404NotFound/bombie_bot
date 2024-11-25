@@ -240,6 +240,7 @@ class ChestActions:
                 logger.debug("Автопродажа уже активирована в структуре")
                 return True
             
+            # Получаем полный скриншот
             image = await self.screen.take_screenshot()
             if image is None:
                 logger.error("Не удалось получить скриншот")
@@ -247,10 +248,16 @@ class ChestActions:
             
             # Получаем область чекбокса
             autosell_area = self.objects.get_default_autosell_area()
-            expanded_area = self.objects.expand_area(autosell_area)
+            expanded_area = self.objects.expand_area(autosell_area, 0.5)
+            
+            # Вырезаем область изображения для проверки
+            cropped_image = image[
+                int(expanded_area.top_left_y):int(expanded_area.bottom_right_y),
+                int(expanded_area.top_left_x):int(expanded_area.bottom_right_x)
+            ]
             
             # Проверяем состояние чекбокса через CV
-            is_checked = self.cv_manager.find_autosell_checkbox(expanded_area)
+            is_checked = self.cv_manager.find_autosell_checkbox(cropped_image)
             
             if is_checked:
                 logger.info("Галочка автопродажи была установлена")
@@ -264,7 +271,11 @@ class ChestActions:
             
             # Проверяем результат
             new_image = await self.screen.take_screenshot()
-            is_checked = self.cv_manager.find_autosell_checkbox(expanded_area)
+            cropped_new_image = new_image[
+                int(expanded_area.top_left_y):int(expanded_area.bottom_right_y),
+                int(expanded_area.top_left_x):int(expanded_area.bottom_right_x)
+            ]
+            is_checked = self.cv_manager.find_autosell_checkbox(cropped_new_image)
             self.button_active.set_autosell(is_checked)
             
             logger.info(f"Состояние автопродажи обновлено в структуре: {is_checked}")
@@ -289,15 +300,19 @@ class ChestActions:
     async def logic_sell_or_equip(self) -> bool:
         """Логика принятия решения о продаже или экипировке"""
         try:
+            # Получаем область индикатора силы
             image = await self.screen.take_screenshot()
             power_area = self.objects.get_default_power_area()
-            
-            # Получаем область индикатора силы
             expanded_area = self.objects.expand_area(power_area)
-
-            # Проверяем состояние индикатора силы
-            logger.debug("Начало проверки индикатора силы")
-            is_power_increase = self.cv_manager.find_power_checkbox(expanded_area)
+            
+            # Вырезаем нужную область из изображения
+            cropped_image = image[
+                int(expanded_area.top_left_y):int(expanded_area.bottom_right_y),
+                int(expanded_area.top_left_x):int(expanded_area.bottom_right_x)
+            ]
+            
+            # Проверяем индикатор силы
+            is_power_increase = self.cv_manager.find_power_checkbox(cropped_image)
             logger.info(f"Результат проверки индикатора силы: {'увеличение' if is_power_increase else 'уменьшение'}")
 
             if is_power_increase:
@@ -308,6 +323,24 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена экипировка предмета")
+                await HumanBehavior.random_delay()
+                
+                # Проверяем результат экипировки
+                check_image = await self.screen.take_screenshot()
+                if self.cv_manager.find_incorrect_equip_choice(check_image):
+                    logger.warning("Обнаружено предупреждение при экипировке, выполняем продажу")
+                    # Выполняем safe click для закрытия предупреждения
+                    safe_coords = await self.get_random_safe_click()
+                    await HumanBehavior.random_delay()
+                    await self.page.mouse.click(safe_coords[0], safe_coords[1])
+                    
+                    # Выполняем продажу
+                    sell_coords = self.objects.get_default_sell_area()
+                    coords = self.objects.get_random_point_in_area(sell_coords)
+                    await HumanBehavior.random_delay()
+                    await self.page.mouse.click(coords[0], coords[1])
+                    logger.info("Выполнена продажа предмета после неудачной экипировки")
+
             else:
                 # Логика продажи
                 logger.info("Обнаружено уменьшение силы, выполняем продажу")
@@ -316,6 +349,23 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена продажа предмета")
+                await HumanBehavior.random_delay()
+                
+                # Проверяем результат продажи
+                check_image = await self.screen.take_screenshot()
+                if self.cv_manager.find_incorrect_equip_choice(check_image):
+                    logger.warning("Обнаружено предупреждение при продаже, выполняем экипировку")
+                    # Выполняем safe click для закрытия предупреждения
+                    safe_coords = await self.get_random_safe_click()
+                    await HumanBehavior.random_delay()
+                    await self.page.mouse.click(safe_coords[0], safe_coords[1])
+                    
+                    # Выполняем экипировку
+                    equip_coords = self.objects.get_default_equip_area()
+                    coords = self.objects.get_random_point_in_area(equip_coords)
+                    await HumanBehavior.random_delay()
+                    await self.page.mouse.click(coords[0], coords[1])
+                    logger.info("Выполнена экипировка предмета после неудачной продажи")
                 
             return True
             

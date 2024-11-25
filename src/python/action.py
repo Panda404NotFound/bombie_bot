@@ -14,6 +14,12 @@ from telethon.tl.types import InputUser
 from urllib.parse import urlparse
 from bot_handle import handle_webapp
 
+# Загрузка переменных окружения
+load_dotenv()
+
+# Получение настройки логирования из .env
+ENABLE_LOGGING = os.getenv('ENABLE_LOGGING', 'true').lower() == 'true'
+
 class TelegramMiniAppAutomation:
     def __init__(self, client: TelegramClient, app_url: str, device_config: dict, bot_metadata: dict = None, webapp_data: dict = None):
         self.client = client
@@ -37,14 +43,17 @@ class TelegramMiniAppAutomation:
         logger.add(
             sys.stdout,
             format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-            level="INFO"
+            level="INFO",
         )
-        logger.add(
-            "miniapp_automation.log",
-            rotation="1 day",
-            retention="7 days",
-            level="DEBUG"
-        )
+        
+        # Добавляем файловое логирование только если оно включено
+        if ENABLE_LOGGING:
+            logger.add(
+                "logs/miniapp_automation_{time}.log",
+                rotation="1 minute",
+                retention="7 days",
+                level="DEBUG",
+            )
 
     async def initialize_webapp(self) -> bool:
         """Инициализация WebApp через MTProto"""

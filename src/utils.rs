@@ -1,9 +1,10 @@
 use anyhow::{Result, anyhow};
-use log::info;
+use log::{info, error};
 use pyo3::Python;
 use std::fs;
 use crate::py_modules::py_imports::get_import_name;
 // use crate::emulation::{get_device_metadata, get_device_browser, EmulatedBrowser};
+use std::env;
 
 // Пытается импортировать пакет с различными вариантами написания имени
 pub fn try_import_package(py: Python<'_>, package: &str) -> Result<()> {
@@ -52,39 +53,33 @@ pub fn parse_requirements() -> Result<Vec<String>> {
         .collect())
 }
 
-/*
-// Логирует информацию об эмулируемом устройстве
-pub async fn log_device_info(device_id: &str) -> Result<()> {
-    if let Ok(metadata) = get_device_metadata(device_id).await {
-        info!(
-            "Устройство {}: \n\
-             - Платформа: {:?}\n\
-             - Модель: {}\n\
-             - Версия: {}\n\
-             - Разрешение: {}x{}\n\
-             - User Agent: {}\n\
-             - Сеть: {}",
-            device_id,
-            metadata.platform,
-            metadata.device_id,
-            metadata.user_agent,
-            metadata.screen_metrics.width,
-            metadata.screen_metrics.height,
-            metadata.webview_data.engine_version,
-            metadata.connection_info.network_type
-        );
+/// Удаляет директории logs и recordings если они существуют
+pub fn delete_logs() -> Result<()> {
+    let should_delete = env::var("DELETE_LOG_FIRST_START")
+        .unwrap_or_else(|_| "false".to_string())
+        .parse::<bool>()
+        .unwrap_or(false);
 
-        if let Ok(browser) = get_device_browser(device_id).await {
-            info!(
-                "Браузер для {}: {:?}",
-                device_id,
-                match browser.as_ref() {
-                    EmulatedBrowser::Webkit(_) => "WebKit",
-                    EmulatedBrowser::ChromiumBased(_) => "Chromium",
-                }
-            );
+    if !should_delete {
+        info!("Пропуск удаления логов (DELETE_LOG_FIRST_START=false)");
+        return Ok(());
+    }
+
+    let current_dir = std::env::current_dir()?;
+    let dirs_to_delete = ["logs", "recordings"];
+
+    for dir in dirs_to_delete.iter() {
+        let path = current_dir.join(dir);
+        if path.exists() {
+            info!("Удаление директории: {}", path.display());
+            match fs::remove_dir_all(&path) {
+                Ok(_) => info!("Успешно удалена директория: {}", dir),
+                Err(e) => error!("Ошибка при удалении директории {}: {}", dir, e)
+            }
+        } else {
+            info!("Директория {} не найдена, пропуск", dir);
         }
     }
+
     Ok(())
 }
-*/

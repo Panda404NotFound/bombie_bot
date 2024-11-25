@@ -45,12 +45,14 @@ class WebAppLogic:
 
         # Устанавливаем начальные состояния и время запуска
         current_time = datetime.now()
+
         # Модуль ежедневных заданий запускаем сразу
         self.module_controller.registry.update_state(
             "daily_tasks_processor",
             ModuleState.PAUSED,
             wait_duration=0  # Запуск сразу
         )
+        
         # Модуль сундуков будет запущен после завершения ежедневных заданий
         self.module_controller.registry.update_state(
             "chest_processor",

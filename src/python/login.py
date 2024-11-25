@@ -53,17 +53,33 @@ class TelegramLogin:
         """Обработка двухфакторной аутентификации"""
         try:
             logger.info("Требуется 2FA")
-            for _ in range(3):  # 3 попытки
+            for _ in range(3):  # Даем 3 попытки ввода 2FA
                 try:
-                    password = getpass.getpass("Введите пароль 2FA (таймаут 2 минуты): ")
+                    password = getpass.getpass("Введите пароль 2FA: ")
                     await client.sign_in(password=password)
                     logger.info("2FA авторизация успешна")
                     return True
                 except Exception as e:
                     logger.error(f"Ошибка 2FA: {e}")
-            return False
+                    continue  # Продолжаем попытки ввода 2FA
+            
+            # Если все попытки 2FA неудачны, очищаем сессию и начинаем заново
+            logger.warning("Все попытки 2FA неудачны, очищаем сессию")
+            await client.disconnect()
+            if self.session_file.exists():
+                self.session_file.unlink()
+            
+            # Создаем новый клиент и начинаем процесс входа заново
+            self.client = await self.initialize_client()
+            await self.client.connect()
+            return await self.sign_in(self.client)
+            
         except Exception as e:
             logger.error(f"Критическая ошибка 2FA: {e}")
+            # В случае критической ошибки также очищаем сессию
+            await client.disconnect()
+            if self.session_file.exists():
+                self.session_file.unlink()
             return False
 
     async def sign_in(self, client: TelegramClient) -> bool:
@@ -399,7 +415,7 @@ class TelegramLogin:
         try:
             launch_button_text = os.getenv("TELEGRAM_LAUNCH_BUTTON_TEXT")
             
-            # Проверяем, является ли объект кноп��ой клавиатуры
+            # Проверяем, является ли объект кнопкой клавиатуры
             if hasattr(message, 'button'):
                 return None  # У клавиатурных кнопок нет URL
             
@@ -467,8 +483,15 @@ class TelegramLogin:
             logger.info("Начинаем процесс подключения к Telegram")
             await self.ensure_session_directory()
             
-            self.client = await self.initialize_client()
-            logger.debug("Клиент Telegram инициализирован")
+            # Добавляем обработку ожидаемой ошибки блокировки базы данных от телеграм
+            try:
+                self.client = await self.initialize_client()
+                logger.debug("Клиент Telegram инициализирован")
+            except Exception as e:
+                if "database is locked" in str(e):
+                    logger.warning("😱 !СЫНОК ТЕБЯ ВЗЛОМАЛИ! 😂 Шучу, ожидаемая ошибка, продолжаем работу: %s", str(e))
+                else:
+                    raise
             
             await self.client.connect()
             logger.debug("Установлено соединение с Telegram")
@@ -510,7 +533,7 @@ class TelegramLogin:
                 return True, None, self.device_config, None, None
 
         except Exception as e:
-            logger.error(f"Ошибка подключения: {e}")
+            logger.warning(f"Некритическая ошибка подключения: {e}")
             return False, None, None, None, None
         
     async def cleanup(self):

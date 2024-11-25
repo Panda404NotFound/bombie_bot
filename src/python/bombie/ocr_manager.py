@@ -6,6 +6,9 @@ import easyocr
 from .data_class import BoxCoordinates, BoxObject, GlobalBoxStorage
 from typing import Optional, Tuple
 import numpy as np
+import certifi
+import ssl
+import urllib.request
 
 class OCRManager:
     _instance = None
@@ -19,7 +22,19 @@ class OCRManager:
                 torch.backends.cudnn.enabled = False
                 torch.set_grad_enabled(False)
                 
-                # Инициализация reader только с базовыми параметрами
+                # Настройка безопасного SSL-контекста
+                ssl_context = ssl.create_default_context(
+                    purpose=ssl.Purpose.SERVER_AUTH,
+                    cafile=certifi.where()
+                )
+                
+                # Создаем безопасный opener для urllib
+                opener = urllib.request.build_opener(
+                    urllib.request.HTTPSHandler(context=ssl_context)
+                )
+                urllib.request.install_opener(opener)
+                
+                # Инициализация reader с безопасными настройками
                 cls._reader = easyocr.Reader(
                     ['ru', 'en'],  # Поддерживаемые языки
                     model_storage_directory='./models',  # Директория для хранения моделей

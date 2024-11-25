@@ -296,16 +296,16 @@ class GameObjects:
         height = self.viewport.height
         
         return BoxCoordinates(
-            # Верхние точки (42.72% - 58.01% по x, 87.24% по y)
-            top_left_x=width * 0.4272,
-            top_left_y=height * 0.8724,
-            top_right_x=width * 0.5801,
-            top_right_y=height * 0.8724,
-            # Нижние точки (42.72% - 58.01% по x, 93.25% - 93.61% по y)
-            bottom_left_x=width * 0.4272,
-            bottom_left_y=height * 0.9325,
-            bottom_right_x=width * 0.5801,
-            bottom_right_y=height * 0.9361
+            # Верхние точки (42.72% - 52.02% по x, 87.24% по y)
+            top_left_x=width * 0.3372,
+            top_left_y=height * 0.8924,
+            top_right_x=width * 0.3808,
+            top_right_y=height * 0.8924,
+            # Нижние точки (42.72% - 52.02% по x, 91.25% - 91.25% по y)
+            bottom_left_x=width * 0.3372,
+            bottom_left_y=height * 0.9075,
+            bottom_right_x=width * 0.3808,
+            bottom_right_y=height * 0.9075
         )
 
     def get_default_chest_area_numbers(self) -> BoxCoordinates:
@@ -390,12 +390,12 @@ class GameObjects:
             top_left_x=width * 0.1481,
             top_left_y=height * 0.8650,
             top_right_x=width * 0.4515,
-            top_right_y=height * 0.8638,
+            top_right_y=height * 0.8650,
             # Нижние точки (12.38% - 45.63% по x, 92.39% - 91.90% по y)
-            bottom_left_x=width * 0.1238,
-            bottom_left_y=height * 0.9239,
-            bottom_right_x=width * 0.4563,
-            bottom_right_y=height * 0.9190
+            bottom_left_x=width * 0.1481,
+            bottom_left_y=height * 0.9229,
+            bottom_right_x=width * 0.4515,
+            bottom_right_y=height * 0.9229
         )
 
     # Пока не используется согласно логике 

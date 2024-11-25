@@ -141,7 +141,7 @@ class TaskActions:
             logger.info("Проверка наличия доступных ежедневных наград")
             # Получаем область кнопки заданий с расширением
             task_button_area = self.objects.get_default_task_button()
-            expanded_area = self.objects.expand_area(task_button_area, 0.4)
+            expanded_area = self.objects.expand_area(task_button_area, 0.2)
             
             # Делаем скриншот расширенной области
             screenshot = await self.screen.take_screenshot(expanded_area)
@@ -159,7 +159,7 @@ class TaskActions:
             return False
 
     # Функция проверки нахождения в меню заданий
-    async def check_task_menu(self) -> bool:
+    async def check_task_menu(self, retry_count=0) -> bool:
         """Проверка нахождения в меню заданий"""
         try:
             image = await self.screen.take_screenshot()
@@ -177,6 +177,17 @@ class TaskActions:
             )
             
             logger.debug(f"Проверка меню заданий: {result} (confidence: {confidence:.2f})")
+            
+            # Если первая попытка не удалась, пробуем еще раз
+            if not result and retry_count == 0:
+                logger.info("Первая попытка проверки меню не удалась, пробуем еще раз")
+                await asyncio.sleep(1.0)  # Добавляем задержку перед повторной попыткой
+                return await self.check_task_menu(retry_count=1)
+            # Если вторая попытка не удалась, перезапускаем process_daily_tasks
+            elif not result and retry_count == 1:
+                logger.warning("Вторая попытка проверки меню не удалась, перезапускаем process_daily_tasks")
+                await self.process_daily_tasks()
+                
             return result
             
         except Exception as e:
@@ -205,7 +216,7 @@ class TaskActions:
             
             # Ждем загрузки вкладки заданий
             logger.info("Ожидание загрузки вкладки заданий")
-            await HumanBehavior.random_delay()
+            await asyncio.sleep(0.7)
             
             # Проверяем, что вкладка заданий открылась
             logger.info("Проверка, что вкладка заданий открылась")
@@ -219,9 +230,9 @@ class TaskActions:
         """Проверка наличия доступных наград"""
         try:
             logger.info("Начало проверки наличия доступных наград")
-            # Получаем область наград и расширяем её на 20%
+            # Получаем область наград и расширяем её на 40%
             rewards_area = self.objects.get_default_daily_task_rewards_button()
-            expanded_area = self.objects.expand_area(rewards_area, 0.2)
+            expanded_area = self.objects.expand_area(rewards_area, 0.4)
             
             screenshot = await self.screen.take_screenshot(expanded_area)
             if screenshot is None:

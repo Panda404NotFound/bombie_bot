@@ -59,7 +59,8 @@ class CVManager:
                 'false_auto_skill_button': None,
                 'true_auto_skill_button': None,
                 'true_task_action': None,
-                'false_task_action': None
+                'false_task_action': None,
+                'incorrect_equip_choice': None
             }
             
             # Поиск файлов шаблонов
@@ -83,7 +84,8 @@ class CVManager:
             self.true_auto_skill_template = cv2.imread(str(template_paths['true_auto_skill_button']), cv2.IMREAD_GRAYSCALE)
             self.true_daily_task_rewards_template = cv2.imread(str(template_paths['true_task_action']), cv2.IMREAD_GRAYSCALE)
             self.false_daily_task_rewards_template = cv2.imread(str(template_paths['false_task_action']), cv2.IMREAD_GRAYSCALE)
-            
+            self.incorrect_equip_choice_template = cv2.imread(str(template_paths['incorrect_equip_choice']), cv2.IMREAD_GRAYSCALE)
+
             # Проверка загруженных шаблонов
             templates = {
                 'true_autosell_set': self.true_autosell_template,
@@ -93,7 +95,8 @@ class CVManager:
                 'false_auto_skill_button': self.false_auto_skill_template,
                 'true_auto_skill_button': self.true_auto_skill_template,
                 'true_task_action': self.true_daily_task_rewards_template,
-                'false_task_action': self.false_daily_task_rewards_template
+                'false_task_action': self.false_daily_task_rewards_template,
+                'incorrect_equip_choice': self.incorrect_equip_choice_template
             }
             
             failed = [name for name, template in templates.items() if template is None]
@@ -290,7 +293,9 @@ class CVManager:
             # Дополнительная проверка через HSV для определения красного индикатора
             # Не знаю насколько эффективная реализация 
             # Как показывает практика, чем выше область изображения, тем эффективнее результат сравнения объекта
-            '''
+
+            has_red_indicator = False 
+
             if result:
                 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
                 
@@ -315,9 +320,48 @@ class CVManager:
                 result = result and has_red_indicator
                 
             logger.debug(f"Результат проверки наград: {result} (красный индикатор: {has_red_indicator}) (true_val: {true_val}, false_val: {false_val})")
+            
+
             return result
-            '''
                 
         except Exception as e:
             logger.error(f"Ошибка при определении состояния наград: {e}")
+            return False
+
+    # Функция проверки не корректного выбора предмета для экипировки
+    def find_incorrect_equip_choice(self, image: np.ndarray) -> bool:
+        """
+        Проверка некорректного выбора предмета для экипировки/продажи
+        
+        Args:
+            image: Входное изображение для анализа
+            
+        Returns:
+            bool: True если обнаружено предупреждение, False в противном случае
+        """
+        try:
+            # Конвертируем в grayscale если изображение цветное
+            if len(image.shape) == 3:
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            else:
+                gray = image
+                
+            # Масштабируем шаблон если необходимо
+            scaled_template = self.scale_template_if_needed(
+                gray,
+                self.incorrect_equip_choice_template,
+                self.incorrect_equip_choice_template
+            )[0]  # Берем первый элемент, так как второй не нужен
+            
+            # Проверяем совпадение с шаблоном
+            result = cv2.matchTemplate(gray, scaled_template, cv2.TM_CCOEFF_NORMED)
+            match_val = np.max(result)
+            
+            logger.debug(f"Совпадение предупреждения о некорректном выборе: {match_val:.3f}")
+            
+            # Возвращаем True если уверенность выше порога
+            return match_val > 0.35
+            
+        except Exception as e:
+            logger.error(f"Ошибка при проверке некорректного выбора предмета: {e}")
             return False
