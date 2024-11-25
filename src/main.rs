@@ -1,22 +1,31 @@
 mod py_modules;
 mod utils;
 mod py_automation;
+mod platform_specific;
+mod config;
+mod errors;
 
+use std::fs;
+use std::sync::Arc;
 use anyhow::Result;
 use dotenv::dotenv;
 use log::{error, info};
-use nix::sys::signal::{self, Signal};
-use nix::unistd::Pid;
 use tokio::signal::ctrl_c;
+
+use config::{SystemConfig, ShutdownState};
+use errors::ShutdownError;
+
 #[allow(unused_imports)]
 use pyo3::Python;
+
 #[allow(unused_imports)]
 use anyhow::anyhow;
+
 #[allow(unused_imports)]
 use crate::py_modules::py_setup::PythonSetup;
+
 #[allow(unused_imports)]
 use crate::utils::{try_import_package, parse_requirements};
-use std::fs;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -30,16 +39,30 @@ async fn main() -> Result<()> {
         error!("Ошибка при удалении логов: {}", e);
     }
 
-    // Ждем 1 секунду для завершения удаления логов
-    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-
-    // Spawn CTRL+C handler
+    let config = Arc::new(SystemConfig::new());
     let pid = std::process::id() as i32;
+
+    // Обработчик Ctrl+C
+    let config_clone = Arc::clone(&config);
     tokio::spawn(async move {
         if let Ok(()) = ctrl_c().await {
-            info!("Получен сигнал Ctrl+C, завершаем работу...");
-            if let Err(e) = signal::kill(Pid::from_raw(pid), Signal::SIGTERM) {
-                error!("Ошибка отправки SIGTERM: {}", e);
+            info!("Initiating graceful shutdown...");
+            
+            let result = async {
+                #[cfg(unix)]
+                platform_specific::unix::handle_shutdown(&config_clone, pid).await?;
+                
+                #[cfg(windows)]
+                platform_specific::windows::handle_shutdown(&config_clone, pid).await?;
+                
+                platform_specific::cleanup::cleanup_resources(&config_clone).await?;
+                config_clone.set_shutdown_state(ShutdownState::Completed);
+                Ok::<(), ShutdownError>(())
+            }.await;
+
+            if let Err(e) = result {
+                error!("Critical shutdown error: {}", e);
+                std::process::exit(1);
             }
         }
     });
