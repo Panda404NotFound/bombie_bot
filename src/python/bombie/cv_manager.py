@@ -279,8 +279,8 @@ class CVManager:
             )
             
             # Проверяем совпадение с шаблонами
-            true_result = cv2.matchTemplate(gray, true_template, cv2.TM_CCOEFF_NORMED)
-            false_result = cv2.matchTemplate(gray, false_template, cv2.TM_CCOEFF_NORMED)
+            false_result = cv2.matchTemplate(gray, true_template, cv2.TM_CCOEFF_NORMED)
+            true_result = cv2.matchTemplate(gray, false_template, cv2.TM_CCOEFF_NORMED)
             
             true_val = np.max(true_result)
             false_val = np.max(false_result)
@@ -294,6 +294,7 @@ class CVManager:
             # Не знаю насколько эффективная реализация 
             # Как показывает практика, чем выше область изображения, тем эффективнее результат сравнения объекта
 
+            '''
             has_red_indicator = False 
 
             if result:
@@ -320,7 +321,7 @@ class CVManager:
                 result = result and has_red_indicator
                 
             logger.debug(f"Результат проверки наград: {result} (красный индикатор: {has_red_indicator}) (true_val: {true_val}, false_val: {false_val})")
-            
+            '''
 
             return result
                 
@@ -360,7 +361,7 @@ class CVManager:
             logger.debug(f"Совпадение предупреждения о некорректном выборе: {match_val:.3f}")
             
             # Возвращаем True если уверенность выше порога
-            return match_val > 0.35
+            return match_val > 0.45
             
         except Exception as e:
             logger.error(f"Ошибка при проверке некорректного выбора предмета: {e}")

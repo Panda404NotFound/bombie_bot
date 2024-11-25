@@ -148,7 +148,7 @@ class ChestActions:
             numbers = [int(s) for s in texts[0].split() if s.isdigit()]
             if not numbers:
                 logger.info("Числа не найдены в тексте")
-                return False
+                return 1 # Возвращаем 1 если нет чисел, чтобы продолжить логику
 
             chest_count = numbers[0]
             logger.info(f"Найдено сундуков: {chest_count}")
@@ -323,7 +323,7 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена экипировка предмета")
-                await HumanBehavior.random_delay()
+                await asyncio.sleep(0.7)
                 
                 # Проверяем результат экипировки
                 check_image = await self.screen.take_screenshot()
@@ -349,7 +349,7 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена продажа предмета")
-                await HumanBehavior.random_delay()
+                await asyncio.sleep(0.7)
                 
                 # Проверяем результат продажи
                 check_image = await self.screen.take_screenshot()

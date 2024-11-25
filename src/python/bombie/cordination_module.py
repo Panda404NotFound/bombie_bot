@@ -11,6 +11,7 @@ from loguru import logger
 from PIL import Image
 from .data_class import BoxCoordinates, BoxObject, GlobalBoxStorage, box_storage
 from .ocr_manager import OCRManager
+import math
 
 @dataclass
 class ViewportConfig:
@@ -149,52 +150,72 @@ class GameObjects:
         self.initialize_box_objects()
 
     @staticmethod
-    def get_random_point_in_area(coordinates: BoxCoordinates) -> Optional[Tuple[float, float]]:
-        """Получение случайной точки внутри четырехугольной области"""
-
+    def get_random_point_in_area(coordinates: BoxCoordinates) -> Tuple[float, float]:
+        """
+        Получение случайной точки внутри четырехугольной области, следуя предложенному алгоритму.
+        """
         try:
+            # Проверка корректности входных данных
             if not isinstance(coordinates, BoxCoordinates):
                 logger.error(f"Некорректный тип координат: {type(coordinates)}")
-                return None
+                return (0.5, 0.5)
 
-            # Определяем четыре угла четырехугольника
-            top_left = (coordinates.top_left_x, coordinates.top_left_y)
-            top_right = (coordinates.top_right_x, coordinates.top_right_y)
-            bottom_right = (coordinates.bottom_right_x, coordinates.bottom_right_y)
-            bottom_left = (coordinates.bottom_left_x, coordinates.bottom_left_y)
+            # Определяем вершины четырехугольника
+            A = (coordinates.top_left_x, coordinates.top_left_y)
+            B = (coordinates.top_right_x, coordinates.top_right_y)
+            C = (coordinates.bottom_right_x, coordinates.bottom_right_y)
+            D = (coordinates.bottom_left_x, coordinates.bottom_left_y)
 
-            # Разбиваем четырехугольник на два треугольника
-            triangles = [
-                [top_left, top_right, bottom_right],
-                [top_left, bottom_left, bottom_right]
+            # Вычисление точки пересечения диагоналей AC и BD
+            def line(p1, p2):
+                """Возвращает коэффициенты a, b, c уравнения прямой ax + by = c"""
+                a = p2[1] - p1[1]
+                b = p1[0] - p2[0]
+                c = a * p1[0] + b * p1[1]
+                return a, b, c
+
+            def intersection(L1, L2):
+                """Вычисляет точку пересечения двух прямых"""
+                D = L1[0]*L2[1] - L2[0]*L1[1]
+                if D == 0:
+                    # Прямые параллельны, используем центр масс четырехугольника
+                    center_x = (A[0] + B[0] + C[0] + D[0]) / 4
+                    center_y = (A[1] + B[1] + C[1] + D[1]) / 4
+                    return (center_x, center_y)
+                x = (L2[1]*L1[2] - L1[1]*L2[2]) / D
+                y = (L1[0]*L2[2] - L2[0]*L1[2]) / D
+                return (x, y)
+
+            # Определяем уравнения прямых для диагоналей
+            L_AC = line(A, C)
+            L_BD = line(B, D)
+
+            # Находим точку пересечения диагоналей
+            center = intersection(L_AC, L_BD)
+
+            # Определяем линии от центра к каждой вершине
+            lines_to_vertices = [
+                (center, A),
+                (center, B),
+                (center, C),
+                (center, D)
             ]
 
-            # Выбираем случайный треугольник
-            triangle = random.choice(triangles)
+            # Случайно выбираем одну из четырех линий
+            selected_line = random.choice(lines_to_vertices)
 
-            # Генерируем случайные барицентрические координаты
-            r1 = random.random()
-            r2 = random.random()
+            # Генерируем случайное число t ∈ [0, 1] для выбора точки на линии
+            t = random.uniform(0, 1)
 
-            # Обеспечиваем, чтобы точка была внутри треугольника
-            if r1 + r2 > 1:
-                r1 = 1 - r1
-                r2 = 1 - r2
-
-            a_x, a_y = triangle[0]
-            b_x, b_y = triangle[1]
-            c_x, c_y = triangle[2]
-
-            # Вычисляем координаты случайной точки
-            x = a_x + r1 * (b_x - a_x) + r2 * (c_x - a_x)
-            y = a_y + r1 * (b_y - a_y) + r2 * (c_y - a_y)
+            # Вычисляем координаты случайной точки на выбранной линии
+            x = selected_line[0][0] + t * (selected_line[1][0] - selected_line[0][0])
+            y = selected_line[0][1] + t * (selected_line[1][1] - selected_line[0][1])
 
             return (x, y)
 
         except Exception as e:
             logger.error(f"Ошибка при получении случайной точки: {e}")
-            return None
-
+            return (0.5, 0.5)
     
     def initialize_box_objects(self):
         """Инициализация базовых box объектов"""
@@ -237,7 +258,7 @@ class GameObjects:
         y_min = min(y_coords)
         y_max = max(y_coords)
 
-        # Вычисляем ширину и высоту
+        # Вычисляем ширину и ��ысоту
         width = x_max - x_min
         height = y_max - y_min
 
@@ -271,7 +292,6 @@ class GameObjects:
         return expanded_area
 
 
-
     def get_default_power_area(self) -> BoxCoordinates:
         """Область показателя силы"""
         width = self.viewport.width
@@ -296,16 +316,16 @@ class GameObjects:
         height = self.viewport.height
         
         return BoxCoordinates(
-            # Верхние точки (42.72% - 52.02% по x, 87.24% по y)
-            top_left_x=width * 0.3372,
-            top_left_y=height * 0.8924,
-            top_right_x=width * 0.3808,
-            top_right_y=height * 0.8924,
-            # Нижние точки (42.72% - 52.02% по x, 91.25% - 91.25% по y)
-            bottom_left_x=width * 0.3372,
-            bottom_left_y=height * 0.9075,
-            bottom_right_x=width * 0.3808,
-            bottom_right_y=height * 0.9075
+            # Верхние точки (47.47% - 52.22% по x, 89.29% по y)
+            top_left_x=width * 0.4747,
+            top_left_y=height * 0.8529,
+            top_right_x=width * 0.5222,
+            top_right_y=height * 0.8529,
+            # Нижние точки (47.47% - 52.22% по x, 91.75% по y)
+            bottom_left_x=width * 0.4747,
+            bottom_left_y=height * 0.8975,
+            bottom_right_x=width * 0.5222,
+            bottom_right_y=height * 0.8975
         )
 
     def get_default_chest_area_numbers(self) -> BoxCoordinates:

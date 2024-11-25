@@ -50,7 +50,7 @@ class TelegramMiniAppAutomation:
         if ENABLE_LOGGING:
             logger.add(
                 "logs/miniapp_automation_{time}.log",
-                rotation="1 minute",
+                rotation="1 day",
                 retention="7 days",
                 level="DEBUG",
             )

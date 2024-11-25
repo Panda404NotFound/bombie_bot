@@ -395,7 +395,7 @@ class BotHandler:
                     else:
                         logger.error(f"Превышено количество попыток навигации после таймаута: {e}")
                         return False
-                elif "net::ERR_CERT_AUTHORITY_INVALID" in str(e):
+                elif "net::ERR_CERT_AUTHORITY_INVALID" in str(e) or "ERR_CONNECTION_CLOSED" in str(e):
                     logger.critical("💀 ПРОБЛЕМА С IP ИЛИ СЕССИЕЙ! ПРОВЕРЬТЕ СОЕДИНЕНИЕ И СМЕНИТЕ PROXY! 💀")
                     return False
                 else:
