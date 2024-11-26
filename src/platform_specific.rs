@@ -58,25 +58,35 @@ pub mod unix {
 #[cfg(windows)]
 pub mod windows {
     use super::*;
-    use windows_sys::Win32::System::Threading;
+    use windows_sys::Win32::Foundation::CloseHandle;
+    use windows_sys::Win32::System::Threading::{OpenProcess, TerminateProcess, PROCESS_TERMINATE};
 
     pub async fn handle_shutdown(config: &SystemConfig, pid: i32) -> Result<()> {
         info!("Handling Windows shutdown...");
+        
         unsafe {
-            let handle = Threading::OpenProcess(
-                Threading::PROCESS_TERMINATE,
-                0,
-                pid as u32
+            let handle = OpenProcess(
+                PROCESS_TERMINATE,
+                0,                
+                pid as u32 
             );
+            
             if handle == 0 {
                 return Err(anyhow::anyhow!("Failed to get process handle"));
             }
-            if Threading::TerminateProcess(handle, 0) == 0 {
-                Threading::CloseHandle(handle);
+
+            let terminate_result = TerminateProcess(handle, 0);
+            let close_result = CloseHandle(handle);
+
+            if terminate_result == 0 {
                 return Err(anyhow::anyhow!("Failed to terminate process"));
             }
-            Threading::CloseHandle(handle);
+
+            if close_result == 0 {
+                return Err(anyhow::anyhow!("Failed to close handle"));
+            }
         }
+
         config.request_shutdown()?;
         Ok(())
     }

@@ -19,6 +19,7 @@ ENABLE_SCREENSHOTS = os.getenv('ENABLE_SCREENSHOTS', 'false').lower() == 'true'
 ENABLE_VIDEO = os.getenv('ENABLE_VIDEO', 'false').lower() == 'true'
 ENABLE_TRACING = os.getenv('ENABLE_TRACING', 'false').lower() == 'true'
 ENABLE_LOGGING = os.getenv('ENABLE_LOGGING', 'true').lower() == 'true'
+ENABLE_HEADLESS = os.getenv('ENABLE_HEADLESS', 'false').lower() == 'true'
 
 # Статические настройки
 MAX_RECONNECT_ATTEMPTS = 3
@@ -134,9 +135,9 @@ class BotHandler:
             
             # Запуск браузера с явным указанием размера окна
             self.browser = await self.playwright.chromium.launch(
-                headless=False,
+                headless=ENABLE_HEADLESS,
                 args=[
-                    f'--window-size={VIEWPORT_WIDTH},{VIEWPORT_HEIGHT}',  # Используем константы
+                    f'--window-size={VIEWPORT_WIDTH},{VIEWPORT_HEIGHT}',
                     '--window-position=0,0'
                 ]
             )
@@ -144,7 +145,7 @@ class BotHandler:
     
             # Создание контекста с эмуляцией устройства
             self.context = await self.browser.new_context(
-                viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT},  # Используем константы
+                viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT},
                 device_scale_factor=self.device_config['device_scale_factor'],
                 user_agent=self.device_config['user_agent']
             )

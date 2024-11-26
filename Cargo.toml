@@ -42,7 +42,10 @@ nix = { version = "0.27", features = ["signal"] }
 
 # Специфичная win конфигурация
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.48", features = ["Win32_System_Threading"] }
+windows-sys = { version = "0.48", features = [
+    "Win32_Foundation",
+    "Win32_System_Threading"
+]}
 ctrlc = "3.4"
 
 [build-dependencies]

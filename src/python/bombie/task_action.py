@@ -160,7 +160,11 @@ class TaskActions:
 
     # Функция проверки нахождения в меню заданий
     async def check_task_menu(self, retry_count=0) -> bool:
-        """Проверка нахождения в меню заданий"""
+        """
+        Проверка нахождения в меню заданий
+        Нужно изменить логику проверки самой кнопки и ее совпадений
+        Через CV manager.
+        """
         try:
             image = await self.screen.take_screenshot()
             if image is None:
@@ -204,7 +208,7 @@ class TaskActions:
                 return False
             
             # Получаем координаты кнопки Daily Task
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(0.7)
             logger.info("Получение координат кнопки Daily Task")
             daily_task_area = self.objects.get_default_dayli_task_button()
             coords = self.objects.get_random_point_in_area(daily_task_area)
@@ -216,7 +220,7 @@ class TaskActions:
             
             # Ждем загрузки вкладки заданий
             logger.info("Ожидание загрузки вкладки заданий")
-            await asyncio.sleep(0.7)
+            await asyncio.sleep(1.5)
             
             # Проверяем, что вкладка заданий открылась
             logger.info("Проверка, что вкладка заданий открылась")
@@ -230,11 +234,13 @@ class TaskActions:
         """Проверка наличия доступных наград"""
         try:
             logger.info("Начало проверки наличия доступных наград")
+            '''
             # Получаем область наград и расширяем её на 40%
             rewards_area = self.objects.get_default_daily_task_rewards_button()
             expanded_area = self.objects.expand_area(rewards_area, 0.4)
-            
             screenshot = await self.screen.take_screenshot(expanded_area)
+            '''
+            screenshot = await self.screen.take_screenshot()
             if screenshot is None:
                 logger.error("Не удалось получить скриншот области наград")
                 return False
