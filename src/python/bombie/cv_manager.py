@@ -60,7 +60,8 @@ class CVManager:
                 'true_auto_skill_button': None,
                 'true_task_action': None,
                 'false_task_action': None,
-                'incorrect_equip_choice': None
+                'incorrect_equip_choice': None,
+                'true_task_button_dayli_task': None
             }
             
             # Поиск файлов шаблонов
@@ -85,6 +86,8 @@ class CVManager:
             self.true_daily_task_rewards_template = cv2.imread(str(template_paths['true_task_action']))
             self.false_daily_task_rewards_template = cv2.imread(str(template_paths['false_task_action']))
             self.incorrect_equip_choice_template = cv2.imread(str(template_paths['incorrect_equip_choice']))
+            self.true_task_button_dayli_task_template = cv2.imread(str(template_paths['true_task_button_dayli_task']))
+
 
             # Проверка загруженных шаблонов
             templates = {
@@ -96,7 +99,8 @@ class CVManager:
                 'true_auto_skill_button': self.true_auto_skill_template,
                 'true_task_action': self.true_daily_task_rewards_template,
                 'false_task_action': self.false_daily_task_rewards_template,
-                'incorrect_equip_choice': self.incorrect_equip_choice_template
+                'incorrect_equip_choice': self.incorrect_equip_choice_template,
+                'true_task_button_dayli_task':self.true_task_button_dayli_task_template
             }
             
             failed = [name for name, template in templates.items() if template is None]
@@ -125,26 +129,22 @@ class CVManager:
         Returns:
             Tuple[np.ndarray, np.ndarray]: Масштабированные шаблоны (template1, template2)
         """
+
         img_h, img_w = image.shape[:2]
         templ_h, templ_w = template1.shape[:2]
         
-        # Проверяем необходимость масштабирования
         if img_h < templ_h or img_w < templ_w:
             logger.debug(f"Масштабирование шаблона: img_h={img_h}, img_w={img_w}, templ_h={templ_h}, templ_w={templ_w}")
-            scale = min(img_h/templ_h, img_w/templ_w) * scale_factor
-            
-            # Вычисляем новые размеры
+            scale = min(img_h / templ_h, img_w / templ_w) * scale_factor
             new_h = int(templ_h * scale)
             new_w = int(templ_w * scale)
             
-            # Проверяем, не превышают ли новые размеры исходные
             if new_h >= img_h or new_w >= img_w:
                 logger.debug("Масштабированные размеры превышают размеры изображения. Возвращаем исходные шаблоны.")
                 return template1, template2
                 
-            # Масштабируем шаблоны
-            scaled_template1 = cv2.resize(template1, (new_w, new_h))
-            scaled_template2 = cv2.resize(template2, (new_w, new_h))
+            scaled_template1 = cv2.resize(template1, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            scaled_template2 = cv2.resize(template2, (new_w, new_h), interpolation=cv2.INTER_AREA)
             return scaled_template1, scaled_template2
         
         logger.debug(f"Шаблоны не масштабируются: img_h={img_h}, img_w={img_w}, templ_h={templ_h}, templ_w={templ_w}")
@@ -272,7 +272,7 @@ class CVManager:
         try:
             # Временное решение, возвращаем всегда True
             # Нужны доработки алгоритма определения наград
-            '''
+
             # Масштабируем шаблоны если необходимо
             true_template, false_template = self.scale_template_if_needed(
                 image,
@@ -296,6 +296,7 @@ class CVManager:
             # Не знаю насколько эффективная реализация 
             # Как показывает практика, чем выше область изображения, тем эффективнее результат сравнения объекта
 
+            '''
             has_red_indicator = False 
 
             if result:
@@ -322,10 +323,9 @@ class CVManager:
                 result = result and has_red_indicator
                 
             logger.debug(f"Результат проверки наград: {result} (красный индикатор: {has_red_indicator}) (true_val: {true_val}, false_val: {false_val})")
+            '''
 
             return result
-            '''
-            return True
 
         except Exception as e:
             logger.error(f"Ошибка при определении состояния наград: {e}")

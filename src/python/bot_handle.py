@@ -50,6 +50,8 @@ class BotHandler:
                 rotation="1 hour",
                 retention="7 days",
                 level="DEBUG",
+                backtrace=True,
+                diagnose=True,
             )
 
     async def check_browser_installation(self):
@@ -138,6 +140,9 @@ class BotHandler:
                 headless=ENABLE_HEADLESS,
                 args=[
                     f'--window-size={VIEWPORT_WIDTH},{VIEWPORT_HEIGHT}',
+                    '--force-device-scale-factor=1',
+                    '--mute-audio',
+                    '--hide-scrollbars',
                     '--window-position=0,0'
                 ]
             )
@@ -333,7 +338,7 @@ class BotHandler:
                 # Настройка обработчиков событий WebApp
                 await self._setup_webapp_event_handlers()
                 
-                # Проверяем инициализацию и состо��ние WebApp
+                # Проверяем инициализацию и состоние WebApp
                 init_status = await self.page.evaluate("""
                     () => {
                         const tg = window.Telegram?.WebApp;
@@ -362,7 +367,7 @@ class BotHandler:
                         # Ждем редирект с таймаутом
                         await self.page.wait_for_function(
                             "() => window.location.href.includes('games.pluto.vision')",
-                            timeout=30000
+                            timeout=50000
                         )
                         logger.info(f"Редирект выполнен успешно: {self.page.url}")
                         
@@ -400,7 +405,7 @@ class BotHandler:
                     logger.critical("💀 ПРОБЛЕМА С IP ИЛИ СЕССИЕЙ! ПРОВЕРЬТЕ СОЕДИНЕНИЕ И СМЕНИТЕ PROXY! 💀")
                     return False
                 else:
-                    logger.error(f"Ошибка навигации: {e}")
+                    logger.error(f"Ошибка на��игации: {e}")
                     return False
 
     async def check_connection(self) -> bool:

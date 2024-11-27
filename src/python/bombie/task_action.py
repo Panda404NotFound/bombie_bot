@@ -51,13 +51,13 @@ class TaskActions:
         task_button_area = self.objects.get_default_task_button()
         if not isinstance(task_button_area, BoxCoordinates):
             logger.error(f"Некорректный тип task_button_area: {type(task_button_area)}")
-            return 'error'  
+            return False 
 
         # Выбираем случайную область для нажатия на кнопку 'Задание'
         task_coords = self.objects.get_random_point_in_area(task_button_area)
         if not task_coords:
             logger.error("Не удалось получить координаты для клика")
-            return 'error'
+            return False
             
         logger.debug(f"Выбраны координаты для клика по заданию: {task_coords}")
         
@@ -79,7 +79,7 @@ class TaskActions:
         safe_coords = self.objects.get_random_point_in_area(safe_area)
         if not safe_coords:
             logger.error("Не удалось получить координаты для клика")
-            return 'error'
+            return False
             
         logger.debug(f"Выбраны координаты для safe click: {safe_coords}")
         
@@ -138,10 +138,11 @@ class TaskActions:
     async def check_daily_rewards(self) -> bool:
         """Проверка наличия доступных ежедневных наград на кнопке заданий"""
         try:
+            '''
             logger.info("Проверка наличия доступных ежедневных наград")
             # Получаем область кнопки заданий с расширением
             task_button_area = self.objects.get_default_task_button()
-            expanded_area = self.objects.expand_area(task_button_area, 0.2)
+            expanded_area = self.objects.expand_area(task_button_area, 0.4)
             
             # Делаем скриншот расширенной области
             screenshot = await self.screen.take_screenshot(expanded_area)
@@ -152,7 +153,10 @@ class TaskActions:
             # Проверяем состояние наград
             result = self.cv_manager.find_daily_task_rewards(screenshot)
             logger.debug(f"Результат проверки ежедневных наград: {result}")
+
             return result
+            '''
+            return True
             
         except Exception as e:
             logger.error(f"Ошибка при проверке ежедневных наград: {e}")
@@ -204,6 +208,7 @@ class TaskActions:
         try:
             logger.info("Начало открытия меню ежедневных заданий")
             # Клик по кнопке заданий
+            await asyncio.sleep(10.0)
             if not await self.click_task_button():
                 return False
             
@@ -277,8 +282,16 @@ class TaskActions:
                 # Проверяем наличие наград
                 if not await self.check_rewards_available():
                     logger.info("Нет доступных наград")
-                    return True  # Возвращаем True, так как все награды собраны
-                    
+                    return 'done'  # Возвращаем True, так как все награды собраны
+
+                # Нажимаем повторно на вкладку   
+                logger.info("Нажимаем повторно на кнопку Daily Task")
+                daily_task_area = self.objects.get_default_dayli_task_button()
+                coords_task = self.objects.get_random_point_in_area(daily_task_area)
+                await HumanBehavior.random_delay()
+                await self.page.mouse.click(coords_task[0], coords_task[1])
+                await asyncio.sleep(0.5)
+
                 # Получаем координаты кнопки наград
                 rewards_area = self.objects.get_default_daily_task_rewards_button()
                 coords = self.objects.get_random_point_in_area(rewards_area)
@@ -295,6 +308,13 @@ class TaskActions:
             logger.error(f"Ошибка при сборе наград: {e}")
             return False
             
+
+
+# НИЖЕ БЛОК ОСНОВНЫХ ФУНКЦИЙ
+# КОТОРЫЕ СОБИРАЮТ ХАЛЯВУ
+# НЕ ГИБКИЙ ПРЯМОЙ ПОДХОД
+
+
     # Основная функция обработки ежедневных заданий
     async def process_daily_tasks(self) -> str:
         """Основная функция обработки ежедневных заданий
@@ -306,6 +326,13 @@ class TaskActions:
         """
         try:
             logger.info("Начало обработки ежедневных заданий")
+
+            # Обрабатываем бесплатные награды
+            free_rewards_result = await self.process_free_dayli_rewards()
+            if not free_rewards_result:
+                logger.error("Ошибка при обработке бесплатных наград")
+                return 'done'
+
             # Проверка главного меню
             if not await self.chest_actions.main_menu():
                 logger.warning("Не в главном меню")
@@ -317,6 +344,7 @@ class TaskActions:
             if not await self.check_daily_rewards():
                 logger.info("Нет доступных наград")
                 await self.back_to_main_menu()
+                await HumanBehavior.random_delay()
                 return 'done'
             
             # Открываем меню заданий
@@ -325,20 +353,216 @@ class TaskActions:
                 return 'done'
             
             # Проверяем наличие наград
+            await asyncio.sleep(1.4)
             if not await self.check_rewards_available():
                 logger.info("Нет доступных наград")
                 await self.back_to_main_menu()
+                await HumanBehavior.random_delay()
                 return 'done'
             
             # Собираем награды
             if not await self.collect_rewards():
                 logger.error("Не удалось собрать награды")
                 await self.back_to_main_menu()
+                await HumanBehavior.random_delay()
                 return 'done'
             
-            logger.info("Награды успешно собраны")
+            logger.info("Обработка всех наград завершена")
+
             return 'continue'
             
         except Exception as e:
             logger.error(f"Ошибка при обработке ежедневных заданий: {e}")
             return 'error'
+
+    # Глобальная функция сбора разных бесплатных плюшек 
+    async def process_free_dayli_rewards(self) -> bool:
+        """Глобальная функция сбора разных бесплатных плюшек
+        
+        Returns:
+            bool: True если все награды собраны успешно, False в случае ошибки
+        """
+        try:
+            logger.info("Начало процесса сбора бесплатных наград")
+
+            # Проверяем, что мы в главном меню перед началом
+            if not await self.chest_actions.main_menu():
+                logger.warning("Не в главном меню, возвращаемся")
+                await self.back_to_main_menu()
+                await asyncio.sleep(1)
+                await HumanBehavior.random_delay()
+                if not await self.chest_actions.main_menu():
+                    logger.error("Не удалось вернуться в главное меню перед началом сбора наград")
+                    return False
+
+            # Нажимаем на кнопку "Пригласить"
+            invite_invite_main = self.objects.get_default_invite_main_button()
+            invite_main_coords = self.objects.get_random_point_in_area(invite_invite_main)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(invite_main_coords[0], invite_main_coords[1])
+            await asyncio.sleep(5)
+
+            # Нажимаем на кнопку "Пригласить друга"
+            invite_friend = self.objects.get_default_invite_friend_button()
+            invite_friend_coords = self.objects.get_random_point_in_area(invite_friend)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(invite_friend_coords[0], invite_friend_coords[1])
+            await asyncio.sleep(5)
+
+            # Повторный клик
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(invite_friend_coords[0], invite_friend_coords[1])
+            await asyncio.sleep(1)
+
+            # Нажимаем на кнопку "Daily Rewards"
+            dayli_reward =  self.objects.get_default_invite_dayli_reward_button()
+            dayli_reward_coords = self.objects.get_random_point_in_area(dayli_reward)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(dayli_reward_coords[0], dayli_reward_coords[1])
+            await asyncio.sleep(5)
+
+            # Нажимаем на кнопку "Получить"
+            get_reward_get =  self.objects.get_default_invite_dayli_reward_get_button()
+            get_reward_coords = self.objects.get_random_point_in_area(get_reward_get)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(get_reward_coords[0], get_reward_coords[1])
+            await asyncio.sleep(3)
+
+            # Повторный клик
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(get_reward_coords[0], get_reward_coords[1])
+            await asyncio.sleep(1)
+
+            # Нажимаем на область отмены
+            cancel_area = self.objects.viewport.cancel_click_area
+            cancel_coords = self.objects.get_random_point_in_area(cancel_area)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(cancel_coords[0], cancel_coords[1])
+            await asyncio.sleep(1)
+
+            # Нажимаем на кнопку "Назад"
+            back_button = self.objects.get_default_back_button()
+            back_button_coords = self.objects.get_random_point_in_area(back_button)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(back_button_coords[0], back_button_coords[1])
+            await asyncio.sleep(0.5)
+
+            # Проверяем, что мы в главном меню после приглашений
+            if not await self.chest_actions.main_menu():
+                logger.warning("Не в главном меню, возвращаемся")
+                await self.back_to_main_menu()
+                await asyncio.sleep(1)
+                await HumanBehavior.random_delay()
+                if not await self.chest_actions.main_menu():
+                    logger.error("Не удалось вернуться в главное меню перед началом сбора наград")
+                    return False
+
+            # Нажимаем на кнопку "Магазин"
+            magazine_coord = self.objects.get_default_magazine_button()
+            magazine_coords = self.objects.get_random_point_in_area(magazine_coord)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(magazine_coords[0], magazine_coords[1])
+            await asyncio.sleep(5)
+
+            # Нажимаем на кнопку "Получить сундук"
+            free_chest = self.objects.get_default_magazine_free_chest()
+            free_chest_coords = self.objects.get_random_point_in_area(free_chest)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(free_chest_coords[0], free_chest_coords[1])
+            await asyncio.sleep(2)
+
+            # Повторный клик
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(free_chest_coords[0], free_chest_coords[1])
+            await asyncio.sleep(1)
+
+            # Нажимаем на область отмены
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(cancel_coords[0], cancel_coords[1])
+
+            # Проверка главного меню
+            if not await self.chest_actions.main_menu():
+                logger.warning("Не в главном меню, возвращаемся")
+                await self.back_to_main_menu()
+                await asyncio.sleep(1)
+                await HumanBehavior.random_delay()
+                if not await self.chest_actions.main_menu():
+                    logger.error("Не удалось вернуться в главное меню перед началом сбора наград")
+                    return False
+
+            # Нажимаем на кнопку "Кубок"
+            kubok_area = self.objects.get_default_kubok_free_rewards_area()
+            kubok_coords = self.objects.get_random_point_in_area(kubok_area)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(kubok_coords[0], kubok_coords[1])
+            await asyncio.sleep(5)
+
+            # Нажимаем на кнопку "Лайк"
+            like_area = self.objects.get_default_kubok_free_rewards_like()
+            like_coords = self.objects.get_random_point_in_area(like_area)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(like_coords[0], like_coords[1])
+            await asyncio.sleep(1)
+
+            # Повторный клик на "Лайк"
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(like_coords[0], like_coords[1])
+            await asyncio.sleep(1)
+
+            # Нажимаем на кнопку "Назад"
+            back_button = self.objects.get_default_back_button()
+            back_coords = self.objects.get_random_point_in_area(back_button)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(back_coords[0], back_coords[1])
+            await asyncio.sleep(0.5)
+
+            # Еще одна проверка главного меню
+            if not await self.chest_actions.main_menu():
+                logger.warning("Не в главном меню, возвращаемся")
+                await self.back_to_main_menu()
+                await asyncio.sleep(1)
+                await HumanBehavior.random_delay()
+                if not await self.chest_actions.main_menu():
+                    logger.error("Не удалось вернуться в главное меню")
+                    return False
+
+            # Клик на фиксированные координаты
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(92, 66)
+            await asyncio.sleep(5)
+
+            # Клик на кнопку сбора вознаграждений в конверте
+            message_rewards = self.objects.get_default_message_free_rewards()
+            message_coords = self.objects.get_random_point_in_area(message_rewards)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(message_coords[0], message_coords[1])
+            await asyncio.sleep(1)
+
+            # Повторный клик на ту же область
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(message_coords[0], message_coords[1])
+            await asyncio.sleep(1)
+
+            # Клик на область отмены
+            cancel_area = self.objects.viewport.cancel_click_area
+            cancel_coords = self.objects.get_random_point_in_area(cancel_area)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(cancel_coords[0], cancel_coords[1])
+            await asyncio.sleep(1)
+
+            # Еще одна проверка главного меню
+            if not await self.chest_actions.main_menu():
+                logger.warning("Не в главном меню, возвращаемся")
+                await self.back_to_main_menu()
+                await asyncio.sleep(1)
+                await HumanBehavior.random_delay()
+                if not await self.chest_actions.main_menu():
+                    logger.error("Не удалось вернуться в главное меню")
+                    return False
+
+            logger.info("Процесс сбора бесплатных наград завершен успешно")
+            return True
+
+        except Exception as e:
+            logger.error(f"Ошибка в процессе сбора бесплатных наград: {e}")
+            return False

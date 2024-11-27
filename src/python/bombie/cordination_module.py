@@ -152,7 +152,7 @@ class GameObjects:
     @staticmethod
     def get_random_point_in_area(coordinates: BoxCoordinates) -> Tuple[float, float]:
         """
-        Получение случайной точки внутри четырехугольной области, следуя предложенному алгоритму.
+        Получение случайной точки внутри области путем анализа диапазонов координат.
         """
         try:
             # Проверка корректности входных данных
@@ -160,80 +160,55 @@ class GameObjects:
                 logger.error(f"Некорректный тип координат: {type(coordinates)}")
                 return (0.5, 0.5)
 
-            # Определяем вершины четырехугольника
-            A = (coordinates.top_left_x, coordinates.top_left_y)
-            B = (coordinates.top_right_x, coordinates.top_right_y)
-            C = (coordinates.bottom_right_x, coordinates.bottom_right_y)
-            D = (coordinates.bottom_left_x, coordinates.bottom_left_y)
-
-            # Вычисление точки пересечения диагоналей AC и BD
-            def line(p1, p2):
-                """Возвращает коэффициенты a, b, c уравнения прямой ax + by = c"""
-                a = p2[1] - p1[1]
-                b = p1[0] - p2[0]
-                c = a * p1[0] + b * p1[1]
-                return a, b, c
-
-            def intersection(L1, L2):
-                """Вычисляет точку пересечения двух прямых"""
-                D = L1[0]*L2[1] - L2[0]*L1[1]
-                if D == 0:
-                    # Прямые параллельны, используем центр масс четырехугольника
-                    center_x = (A[0] + B[0] + C[0] + D[0]) / 4
-                    center_y = (A[1] + B[1] + C[1] + D[1]) / 4
-                    return (center_x, center_y)
-                x = (L2[1]*L1[2] - L1[1]*L2[2]) / D
-                y = (L1[0]*L2[2] - L2[0]*L1[2]) / D
-                return (x, y)
-
-            # Определяем уравнения прямых для диагоналей
-            L_AC = line(A, C)
-            L_BD = line(B, D)
-
-            # Находим точку пересечения диагоналей
-            center = intersection(L_AC, L_BD)
-
-            # Определяем линии от центра к каждой вершине
-            lines_to_vertices = [
-                (center, A),
-                (center, B),
-                (center, C),
-                (center, D)
+            # Получаем все точки
+            points = [
+                (coordinates.top_left_x, coordinates.top_left_y),
+                (coordinates.top_right_x, coordinates.top_right_y),
+                (coordinates.bottom_right_x, coordinates.bottom_right_y),
+                (coordinates.bottom_left_x, coordinates.bottom_left_y)
             ]
 
-            # Случайно выбираем одну из четырех линий
-            selected_line = random.choice(lines_to_vertices)
+            # Получаем уникальные отсортированные значения X и Y
+            x_values = sorted(set(p[0] for p in points))
+            y_values = sorted(set(p[1] for p in points))
 
-            # Генерируем случайное число t ∈ [0, 1] для выбора точки на линии
-            t = random.uniform(0, 1)
+            def find_range_bounds(values):
+                """
+                Находит корректные границы диапазона, учитывая близость значений
+                """
+                if len(values) <= 2:
+                    return min(values), max(values)
+                    
+                # Находим разницы между соседними значениями
+                diffs = [values[i+1] - values[i] for i in range(len(values)-1)]
+                min_diff = min(diffs)
+                # Находим все индексы с минимальной разницей
+                min_diff_indices = [i for i, d in enumerate(diffs) if d == min_diff]
+                # Берем первый индекс
+                min_diff_idx = min_diff_indices[0]
+                
+                # Получаем два ближайших значения
+                close_values = [values[min_diff_idx], values[min_diff_idx + 1]]
+                lower_bound = max(close_values)
+                upper_bound = max(values)
 
-            # Вычисляем координаты случайной точки на выбранной линии
-            x = selected_line[0][0] + t * (selected_line[1][0] - selected_line[0][0])
-            y = selected_line[0][1] + t * (selected_line[1][1] - selected_line[0][1])
+                return lower_bound, upper_bound
 
-            return (x, y)
+            # Определяем корректные диапазоны для X и Y
+            x_min, x_max = find_range_bounds(x_values)
+            y_min, y_max = find_range_bounds(y_values)
+
+            # Генерируем случайную точку внутри определенных границ
+            random_x = random.uniform(x_min, x_max)
+            random_y = random.uniform(y_min, y_max)
+
+            logger.debug(f"Сгенерированная точка: ({random_x}, {random_y})")
+            return (random_x, random_y)
 
         except Exception as e:
             logger.error(f"Ошибка при получении случайной точки: {e}")
             return (0.5, 0.5)
-    
-    def initialize_box_objects(self):
-        """Инициализация базовых box объектов"""
-        box_storage.add_object('chest', self.get_default_chest_area())
-        box_storage.add_object('chest_numbers', self.get_default_chest_area_numbers())
-        box_storage.add_object('autosell', self.get_default_autosell_area())
-        box_storage.add_object('autosell_checkbox', self.get_default_autosell_checkbox_area())
-        box_storage.add_object('equip_button', self.get_default_equip_area())
-        box_storage.add_object('sell_button', self.get_default_sell_area())
-        box_storage.add_object('power_area', self.get_default_power_area())
-        box_storage.add_object('auto_equip_button', self.get_default_auto_equip_button())
-        box_storage.add_object('level_and_stats_button', self.get_default_level_and_stats_area())
-        box_storage.add_object('boss_button', self.get_default_boss_button())
-        box_storage.add_object('auto_skill_button_click', self.get_auto_skill_button_click())
-        box_storage.add_object('auto_skill_button_area', self.get_auto_skill_button_area())
-        box_storage.add_object('task_button', self.get_default_task_button())
-        box_storage.add_object('dayli_task_button', self.get_default_dayli_task_button())
-        box_storage.add_object('daily_task_rewards_button', self.get_default_daily_task_rewards_button())
+
 
     # Функция расширения области для нахождения объектов
     def expand_area(self, area: BoxCoordinates, expand_percent: float = 0.1) -> BoxCoordinates:
@@ -290,8 +265,37 @@ class GameObjects:
         )
 
         return expanded_area
+    
+    def initialize_box_objects(self):
+        """Инициализация базовых box объектов"""
+        box_storage.add_object('chest', self.get_default_chest_area())
+        box_storage.add_object('chest_numbers', self.get_default_chest_area_numbers())
+        box_storage.add_object('autosell', self.get_default_autosell_area())
+        box_storage.add_object('autosell_checkbox', self.get_default_autosell_checkbox_area())
+        box_storage.add_object('equip_button', self.get_default_equip_area())
+        box_storage.add_object('sell_button', self.get_default_sell_area())
+        box_storage.add_object('power_area', self.get_default_power_area())
+        box_storage.add_object('auto_equip_button', self.get_default_auto_equip_button())
+        box_storage.add_object('level_and_stats_button', self.get_default_level_and_stats_area())
+        box_storage.add_object('boss_button', self.get_default_boss_button())
+        box_storage.add_object('auto_skill_button_click', self.get_auto_skill_button_click())
+        box_storage.add_object('auto_skill_button_area', self.get_auto_skill_button_area())
+        box_storage.add_object('task_button', self.get_default_task_button())
+        box_storage.add_object('dayli_task_button', self.get_default_dayli_task_button())
+        box_storage.add_object('daily_task_rewards_button', self.get_default_daily_task_rewards_button())
+        box_storage.add_object('invite_main_button', self.get_default_invite_main_button())
+        box_storage.add_object('invite_friend_button', self.get_default_invite_friend_button())
+        box_storage.add_object('invite_dayli_reward_button', self.get_default_invite_dayli_reward_button())
+        box_storage.add_object('invite_dayli_reward_get_button', self.get_default_invite_dayli_reward_get_button())
+        box_storage.add_object('back_button', self.get_default_back_button())
+        box_storage.add_object('magazine_main_menu', self.get_default_magazine_button())
+        box_storage.add_object('free_magazine_chest', self.get_default_magazine_free_chest())
+        box_storage.add_object('kubok_free_rewards_area', self.get_default_kubok_free_rewards_area())
+        box_storage.add_object('kubok_free_rewards_like', self.get_default_kubok_free_rewards_like())
+        box_storage.add_object('message_free_rewards', self.get_default_message_free_rewards())
 
 
+    # Область силы для сравнения внутри сундука
     def get_default_power_area(self) -> BoxCoordinates:
         """Область показателя силы"""
         width = self.viewport.width
@@ -310,6 +314,7 @@ class GameObjects:
             bottom_right_y=height * 0.6859
         )
 
+    # Область сундука для нажатия
     def get_default_chest_area(self) -> BoxCoordinates:
         """Область сундука в процентах от размеров viewport"""
         width = self.viewport.width
@@ -317,17 +322,18 @@ class GameObjects:
         
         return BoxCoordinates(
             # Верхние точки (47.47% - 52.22% по x, 89.29% по y)
-            top_left_x=width * 0.4747,
-            top_left_y=height * 0.8529,
-            top_right_x=width * 0.5222,
-            top_right_y=height * 0.8529,
+            top_left_x=width * 0.4847,
+            top_left_y=height * 0.8629,
+            top_right_x=width * 0.5022,
+            top_right_y=height * 0.8629,
             # Нижние точки (47.47% - 52.22% по x, 91.75% по y)
-            bottom_left_x=width * 0.4747,
+            bottom_left_x=width * 0.4847,
             bottom_left_y=height * 0.8975,
-            bottom_right_x=width * 0.5222,
+            bottom_right_x=width * 0.5022,
             bottom_right_y=height * 0.8975
         )
 
+    # Область сундука для определения количества сундуков 
     def get_default_chest_area_numbers(self) -> BoxCoordinates:
         """Область сундука в процентах от размеров viewport для количества сундуков"""
         width = self.viewport.width
@@ -346,6 +352,7 @@ class GameObjects:
             bottom_right_y=height * 1.0
         )
 
+    # Область кнопки автопродажи внутри сундука
     def get_default_autosell_area(self) -> BoxCoordinates:
         """Область кнопки автопродажи"""
         width = self.viewport.width
@@ -568,4 +575,184 @@ class GameObjects:
             bottom_left_y=height * 0.2969,
             bottom_right_x=width * 0.8471,
             bottom_right_y=height * 0.2969
+        )
+    
+    # Кнопка пригласить в главном меню
+    def get_default_invite_main_button(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (290/412 = 0.7038, 316/412 = 0.7670 по x, 758/815 = 0.9301 по y)
+            top_left_x=width * 0.7038,
+            top_left_y=height * 0.9301,
+            top_right_x=width * 0.7670,
+            top_right_y=height * 0.9301,
+            # Нижние точки (290/412 = 0.7038, 316/412 = 0.7670 по x, 780/815 = 0.9571 по y)
+            bottom_left_x=width * 0.7038,
+            bottom_left_y=height * 0.9571,
+            bottom_right_x=width * 0.7670,
+            bottom_right_y=height * 0.9571
+        )
+
+    # Пригласить друга кнопка забрать сундук
+    def get_default_invite_friend_button(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (138/412 = 0.3350, 280/412 = 0.6796 по x, 717/815 = 0.8798 по y)
+            top_left_x=width * 0.3350,
+            top_left_y=height * 0.8798,
+            top_right_x=width * 0.6796,
+            top_right_y=height * 0.8798,
+            # Нижние точки (138/412 = 0.3350, 280/412 = 0.6796 по x, 740/815 = 0.9080 по y)
+            bottom_left_x=width * 0.3350,
+            bottom_left_y=height * 0.9080,
+            bottom_right_x=width * 0.6796,
+            bottom_right_y=height * 0.9080
+        )
+
+    # Кнопка ежедневных заданий в Пригласить 
+    def get_default_invite_dayli_reward_button(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (245/412 = 0.5947, 370/412 = 0.8981 по x, 646/815 = 0.7926 по y)
+            top_left_x=width * 0.5947,
+            top_left_y=height * 0.7926,
+            top_right_x=width * 0.8981,
+            top_right_y=height * 0.7926,
+            # Нижние точки (245/412 = 0.5947, 370/412 = 0.8981 по x, 668/815 = 0.8196 по y)
+            bottom_left_x=width * 0.5947,
+            bottom_left_y=height * 0.8196,
+            bottom_right_x=width * 0.8981,
+            bottom_right_y=height * 0.8196
+        )
+
+    # Кнопка получить в ежедневных заданиях в Пригласить 
+    def get_default_invite_dayli_reward_get_button(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (274/412 = 0.6650, 370/412 = 0.8981 по x, 646/815 = 0.7926 по y)
+            top_left_x=width * 0.6650,
+            top_left_y=height * 0.7926,
+            top_right_x=width * 0.8981,
+            top_right_y=height * 0.7926,
+            # Нижние точки (274/412 = 0.6650, 370/412 = 0.8981 по x, 674/815 = 0.8270 по y)
+            bottom_left_x=width * 0.6650,
+            bottom_left_y=height * 0.8270,
+            bottom_right_x=width * 0.8981,
+            bottom_right_y=height * 0.8270
+        )
+
+    # Кнопка назад в меню 
+    def get_default_back_button(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (26/412 = 0.0631, 50/412 = 0.1214 по x, 65/815 = 0.0798 по y)
+            top_left_x=width * 0.0631,
+            top_left_y=height * 0.0798,
+            top_right_x=width * 0.1214,
+            top_right_y=height * 0.0798,
+            # Нижние точки (26/412 = 0.0631, 46/412 = 0.1117 по x, 75/815 = 0.0920 по y)
+            bottom_left_x=width * 0.0631,
+            bottom_left_y=height * 0.0920,
+            bottom_right_x=width * 0.1117,
+            bottom_right_y=height * 0.0920
+        )
+
+    # Кнопка магазина на главном меню
+    def get_default_magazine_button(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (350/412 = 0.8495, 390/412 = 0.9466 по x, 750/815 = 0.9202 по y)
+            top_left_x=width * 0.8495,
+            top_left_y=height * 0.9202,
+            top_right_x=width * 0.9466,
+            top_right_y=height * 0.9202,
+            # Нижние точки (350/412 = 0.8495, 390/412 = 0.9466 по x, 780/815 = 0.9571 по y)
+            bottom_left_x=width * 0.8495,
+            bottom_left_y=height * 0.9571,
+            bottom_right_x=width * 0.9466,
+            bottom_right_y=height * 0.9571
+        )
+
+    # Кнопка получить сундук внутри магазина халявный 
+    def get_default_magazine_free_chest(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (52/412 = 0.1262, 125/412 = 0.3034 по x, 305/815 = 0.3742 по y)
+            top_left_x=width * 0.1262,
+            top_left_y=height * 0.3742,
+            top_right_x=width * 0.3034,
+            top_right_y=height * 0.3742,
+            # Нижние точки (52/412 = 0.1262, 125/412 = 0.3034 по x, 315/815 = 0.3865 по y)
+            bottom_left_x=width * 0.1262,
+            bottom_left_y=height * 0.3865,
+            bottom_right_x=width * 0.3034,
+            bottom_right_y=height * 0.3865
+        )
+
+    # Область кнопки "Кубок" слева сверху
+    def get_default_kubok_free_rewards_area(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (25/412 = 0.0607, 50/412 = 0.1214 по x, 102/815 = 0.1252 по y)
+            top_left_x=width * 0.0607,
+            top_left_y=height * 0.1252,
+            top_right_x=width * 0.1214,
+            top_right_y=height * 0.1252,
+            # Нижние точки (25/412 = 0.0607, 50/412 = 0.1214 по x, 128/815 = 0.1571 по y)
+            bottom_left_x=width * 0.0607,
+            bottom_left_y=height * 0.1571,
+            bottom_right_x=width * 0.1214,
+            bottom_right_y=height * 0.1571
+        )
+
+    # Область кнопки "Лайк" в кубке 
+    def get_default_kubok_free_rewards_like(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+
+        return BoxCoordinates(
+            # Верхние точки (240/412 = 0.5825, 250/412 = 0.6068 по x, 195/815 = 0.2393 по y)
+            top_left_x=width * 0.5825,
+            top_left_y=height * 0.2393,
+            top_right_x=width * 0.6068,
+            top_right_y=height * 0.2393,
+            # Нижние точки (240/412 = 0.5825, 250/412 = 0.6068 по x, 200/815 = 0.2454 по y)
+            bottom_left_x=width * 0.5825,
+            bottom_left_y=height * 0.2454,
+            bottom_right_x=width * 0.6068,
+            bottom_right_y=height * 0.2454
+        )
+
+    # Кнопка собрать вознагражденя в конверте
+    def get_default_message_free_rewards(self) -> BoxCoordinates:
+        width = self.viewport.width
+        height = self.viewport.height
+        
+        return BoxCoordinates(
+            # Верхние точки (254/412 = 0.6165, 335/412 = 0.8131 по x, 642/815 = 0.7877 по y)
+            top_left_x=width * 0.6165,
+            top_left_y=height * 0.7877,
+            top_right_x=width * 0.8131, 
+            top_right_y=height * 0.7877,
+            # Нижние точки (254/412 = 0.6165, 335/412 = 0.8131 по x, 666/815 = 0.8172 по y)
+            bottom_left_x=width * 0.6165,
+            bottom_left_y=height * 0.8172,
+            bottom_right_x=width * 0.8131,
+            bottom_right_y=height * 0.8172
         )

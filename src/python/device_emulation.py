@@ -36,8 +36,8 @@ class AndroidDeviceEmulator:
                 device_model="Pixel 7 Pro",
                 system_version="Android 14",
                 app_version="10.6.1",
-                lang_code="en",
-                system_lang_code="en-US",
+                lang_code="ru",
+                system_lang_code="ru-RU",
                 device_info={
                     "brand": "Google",
                     "model": "GP4BC",
@@ -61,8 +61,8 @@ class AndroidDeviceEmulator:
                 device_model="Galaxy S23 Ultra",
                 system_version="Android 14",
                 app_version="10.5.0",
-                lang_code="en",
-                system_lang_code="en-US",
+                lang_code="ru",
+                system_lang_code="ru-RU",
                 device_info={
                     "brand": "samsung",
                     "model": "SM-S918B",
@@ -86,8 +86,8 @@ class AndroidDeviceEmulator:
                 device_model="OnePlus 11",
                 system_version="Android 14",
                 app_version="10.4.2",
-                lang_code="en",
-                system_lang_code="en-US",
+                lang_code="ru",
+                system_lang_code="ru-RU",
                 device_info={
                     "brand": "OnePlus",
                     "model": "CPH2449",

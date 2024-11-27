@@ -61,7 +61,7 @@ class ChestActions:
             
         self.text_patterns = {
             'menu': {
-                'ru': ['навык', 'задание', 'пригл.', 'магаз.'],
+                'ru': ['навык', 'задание', 'пригл', 'магаз'],
                 'en': ['skill', 'quest', 'invite', 'shop', 'store']
             },
             'chest': {
@@ -323,6 +323,7 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена экипировка предмета")
+                await asyncio.sleep(1)
                 await HumanBehavior.random_delay()
                 
                 # Проверяем результат экипировки
@@ -349,6 +350,7 @@ class ChestActions:
                 await HumanBehavior.random_delay()
                 await self.page.mouse.click(coords[0], coords[1])
                 logger.info("Выполнена продажа предмета")
+                await asyncio.sleep(1)
                 await HumanBehavior.random_delay()
                 
                 # Проверяем результат продажи
@@ -403,7 +405,13 @@ class ChestActions:
         logger.info(f"Начало обработки сундука (попытка {attempt}/3)")
         
         if attempt >= 3:
-            logger.warning("Превышено максимальное количество попыток")
+            logger.warning("Превышено максимальное количество попыток, нажимаем кнопку назад")
+            # Нажимаем кнопку назад
+            back_button = self.objects.get_default_back_button()
+            back_coords = self.objects.get_random_point_in_area(back_button)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(back_coords[0], back_coords[1])
+            await asyncio.sleep(1)
             return 'error'
         
         try:
@@ -433,7 +441,13 @@ class ChestActions:
             if not await self.check_chest_numbers():
                 logger.info("Доступных сундуков нет, переходим в режим ожидания")
                 return 'done'
-                
+
+            # Пытаемся залутать плюшки в процессе открытия сундука
+            await self.page.mouse.click(73, 703)
+            await HumanBehavior.random_delay()
+            await self.page.mouse.click(73, 703)
+            await HumanBehavior.random_delay()
+
             # Клик по сундуку
             logger.debug("Получение области сундука")
             chest_area = self.objects.get_default_chest_area()
