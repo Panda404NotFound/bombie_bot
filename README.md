@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="./templates/git/github_logo.webp" alt="Bombie Bot Logo" width="200"/>
+  <img src="./templates/git/github_logo.webp" alt="Bombie Bot Logo" width="100%"/>
   
   # 🤖 BOMBIE BOT
   ### НАША КОМАНДА [HIDDENCODE](https://t.me/hidden_coding)
