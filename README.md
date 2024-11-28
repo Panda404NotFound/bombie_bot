@@ -195,6 +195,7 @@ logic_task = asyncio.create_task(webapp_logic.start_logic())
 ver. 2.0:
 - Исправлены мелкие ошибки и баги 
 - Улучшена логика работы бота 
+- Баги с директориями Windows
 
 Исправления на 26.11.24:
 

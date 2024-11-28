@@ -158,7 +158,7 @@ impl PythonSetup {
         let python_version = self.get_python_version()?;
         info!("Обнаружена версия Python: {}", python_version);
         
-        // Получаем абсолютные пути с учетом версии Python
+        // Корректное определение путей с учетом Windows
         let venv_site_packages = if cfg!(windows) {
             self.venv_path.join("Lib").join("site-packages")
         } else {
@@ -174,21 +174,25 @@ impl PythonSetup {
             self.venv_path.join("bin")
         };
 
-        // Проверяем существование директории
+        // Проверка существования директории с корректной обработкой ошибок для Windows
         if !venv_site_packages.exists() {
+            error!("Site-packages path not found: {}", venv_site_packages.display());
             return Err(anyhow!(
                 "Директория site-packages не существует: {}",
                 venv_site_packages.display()
             ));
         }
 
-        // Настраиваем PATH
+        // Корректная настройка PATH для Windows
         let path = env::var("PATH").unwrap_or_default();
-        let new_path = format!("{}:{}", venv_bin.display(), path);
+        let path_separator = if cfg!(windows) { ";" } else { ":" };
+        let new_path = format!("{}{}{}", venv_bin.display(), path_separator, path);
         env::set_var("PATH", new_path);
 
-        // Настраиваем PYTHONPATH
-        let pythonpath = format!("{}", venv_site_packages.display());
+        // Настройка PYTHONPATH с учетом Windows-путей
+        let pythonpath = venv_site_packages.to_str().ok_or_else(|| 
+            anyhow!("Невалидный путь site-packages")
+        )?;
         env::set_var("PYTHONPATH", &pythonpath);
         info!("Установлен PYTHONPATH: {}", pythonpath);
 
@@ -201,11 +205,21 @@ impl PythonSetup {
             let paths: Vec<String> = sys.getattr("path")?.extract()?;
             info!("Текущие пути Python: {:?}", paths);
             
-            // Добавляем site-packages в sys.path если его там нет
-            if !paths.iter().any(|p| p == &pythonpath) {
-                sys.getattr("path")?
-                   .call_method1("append", (pythonpath.clone(),))?;
-                info!("Добавлен путь в sys.path: {}", pythonpath.clone());
+            // Добавляем все необходимые пути
+            let current_dir = env::current_dir()?;
+            let paths_to_add = vec![
+                pythonpath.to_string(),
+                current_dir.join("src").join("python").to_str()
+                    .ok_or_else(|| anyhow!("Невалидный путь python"))?.to_string(),
+                current_dir.to_str()
+                    .ok_or_else(|| anyhow!("Невалидный путь current_dir"))?.to_string(),
+            ];
+
+            for path in paths_to_add {
+                if !paths.iter().any(|p| p == &path) {
+                    sys.getattr("path")?.call_method1("append", (&path,))?;
+                    info!("Добавлен путь в sys.path: {}", path);
+                }
             }
             
             Ok::<(), anyhow::Error>(())
@@ -263,7 +277,7 @@ impl PythonSetup {
         Ok(())
     }
 
-    // Добавляем новый метод для опре��еления версии Python
+    // Добавляем новый метод для определения версии Python
     fn get_python_version(&self) -> Result<String> {
         let python_path = if cfg!(windows) {
             self.venv_path.join("Scripts").join("python.exe")
