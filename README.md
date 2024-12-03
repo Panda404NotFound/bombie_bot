@@ -1,3 +1,56 @@
+<h1 align="center">⚠️ Внимание | Warning ⚠️</h1>
+
+<div align="center">
+
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-no-red.svg)](https://bitbucket.org/lbesson/ansi-colors)
+[![Generic badge](https://img.shields.io/badge/Status-Discontinued-red.svg)](https://shields.io/)
+[![made-with-love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://shields.io/)
+
+</div>
+
+<div align="center">
+  <img src="https://github.com/rajput2107/rajput2107/blob/master/Assets/Developer.gif" width="150px" />
+</div>
+
+<br/>
+
+<h2 align="center">🚫 Русский</h2>
+
+<p align="center">
+  <b>
+    ❗ ВНИМАНИЕ. ОФИЦИАЛЬНАЯ ПОДДЕРЖКА ОСТАНОВЛЕНА. БОТ МОЖЕТ РАБОТАТЬ НЕ КОРРЕКТНО! ❗
+  </b>
+</p>
+
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Panda404NotFound/bombie_bot/output/github-contribution-grid-snake-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Panda404NotFound/bombie_bot/output/github-contribution-grid-snake.svg">
+  </picture>
+</div>
+
+---
+
+<h2 align="center">🚫 English</h2>
+
+<p align="center">
+  <b>
+    ❗ ATTENTION. OFFICIAL SUPPORT HAS BEEN DISCONTINUED. THE BOT MAY NOT FUNCTION CORRECTLY! ❗
+  </b>
+</p>
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/Platane/snk/output/github-contribution-grid-snake-dark.svg" width="100%"/>
+</div>
+
+<div align="center">
+  
+[![GitHub stars](https://img.shields.io/github/stars/Panda404NotFound/bombie_bot.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/Panda404NotFound/bombie_bot/stargazers/)
+[![GitHub forks](https://img.shields.io/github/forks/Panda404NotFound/bombie_bot.svg?style=social&label=Fork&maxAge=2592000)](https://GitHub.com/Panda404NotFound/bombie_bot/network/)
+[![GitHub contributors](https://img.shields.io/github/contributors/Panda404NotFound/bombie_bot.svg)](https://GitHub.com/Panda404NotFound/bombie_bot/graphs/contributors/)
+[![GitHub issues](https://img.shields.io/github/issues/Panda404NotFound/bombie_bot.svg)](https://GitHub.com/Panda404NotFound/bombie_bot/issues/)
+
+</div>
 
 <div align="center">
   <img src="./templates/git/github_logo.webp" alt="Bombie Bot Logo" width="100%"/>
