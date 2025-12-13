@@ -1,3 +1,69 @@
+<div align="center">
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                    🎬 BOT IN ACTION - LIVE DEMO 🎬                      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<br/>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎮%20Bombie%20Bot%20Demo&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35">
+  <source media="(prefers-color-scheme: light)" srcset="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎮%20Bombie%20Bot%20Demo&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎮%20Bombie%20Bot%20Demo&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35" alt="Bombie Bot Demo Header">
+</picture>
+
+<h2>
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=667EEA&center=true&vCenter=true&repeat=true&width=600&lines=✨+Watch+The+Bot+In+Action!;🎁+Automated+Task+Completion;⚡+Smart+Chest+Opening;🚀+Real-Time+Demonstration" alt="Typing SVG" />
+</h2>
+
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                           MAIN GIF SHOWCASE                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<table>
+<tr>
+<td>
+
+<div align="center">
+  
+### 🎬 **SEE HOW THE BOT WORKS**
+
+<img src="./assets/bombie.gif" alt="Bombie Bot Automation Demo" width="800px" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+
+<br/><br/>
+
+> **🎯 Full automation of Bombie bot tasks**  
+> Watch as the bot intelligently completes tasks, opens chests, and collects rewards automatically
+
+<br/>
+
+<!-- Feature Badges -->
+<p>
+  <img src="https://img.shields.io/badge/✨_Automated-Tasks-blueviolet?style=for-the-badge&logoColor=white" alt="Automated Tasks">
+  <img src="https://img.shields.io/badge/🎁_Chest-Opening-purple?style=for-the-badge&logoColor=white" alt="Chest Opening">
+  <img src="https://img.shields.io/badge/⚡_Smart-Rewards-violet?style=for-the-badge&logoColor=white" alt="Smart Rewards">
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/🤖_Browser-Automation-blue?style=flat-square" alt="Browser Automation">
+  <img src="https://img.shields.io/badge/🎯_Task-Completion-success?style=flat-square" alt="Task Completion">
+  <img src="https://img.shields.io/badge/⏱️_Real--time-Processing-orange?style=flat-square" alt="Real-time">
+  <img src="https://img.shields.io/badge/🔄_Auto-Loop-red?style=flat-square" alt="Auto Loop">
+</p>
+
+</div>
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+
+<br/><br/>
 
 </div>
 
