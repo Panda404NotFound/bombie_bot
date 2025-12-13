@@ -1,59 +1,52 @@
 <div align="center">
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                    🎬 BOT IN ACTION - LIVE DEMO 🎬                      -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════ -->
+<!--                          🎬 BOT DEMONSTRATION SHOWCASE 🎬                          -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════ -->
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,16,20,24&height=180&section=header&text=🎮%20BOMBIE%20BOT%20DEMO&fontSize=42&fontColor=fff&animation=fadeIn&fontAlignY=35&desc=Watch%20The%20Automation%20In%20Action&descSize=18&descAlignY=55"/>
 
 <br/>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎮%20Bombie%20Bot%20Demo&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35">
-  <source media="(prefers-color-scheme: light)" srcset="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎮%20Bombie%20Bot%20Demo&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎮%20Bombie%20Bot%20Demo&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35" alt="Bombie Bot Demo Header">
-</picture>
+<!-- ══════════════════════════════════════════════════════════════════════════════════ -->
+<!--                              MAIN GIF DEMONSTRATION                                -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════ -->
 
-<h2>
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=667EEA&center=true&vCenter=true&repeat=true&width=600&lines=✨+Watch+The+Bot+In+Action!;🎁+Automated+Task+Completion;⚡+Smart+Chest+Opening;🚀+Real-Time+Demonstration" alt="Typing SVG" />
-</h2>
+<h1>
+  <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/clapper-board_1f3ac.gif" width="35" height="35"/>
+  <b>SEE THE BOT IN ACTION</b>
+  <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/clapper-board_1f3ac.gif" width="35" height="35"/>
+</h1>
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                           MAIN GIF SHOWCASE                             -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<table>
+<table align="center">
 <tr>
-<td>
+<td align="center" width="900">
 
-<div align="center">
-  
-### 🎬 **SEE HOW THE BOT WORKS**
+<img src="./assets/bombie.gif" alt="Bombie Bot - Full Automation Demo" width="100%"/>
 
-<img src="./assets/bombie.gif" alt="Bombie Bot Automation Demo" width="800px" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+</td>
+</tr>
+<tr>
+<td align="center">
 
-<br/><br/>
+<h3>
+  <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/robot_1f916.gif" width="25" height="25"/>
+  <i>Full Automation of Telegram Bot Tasks</i>
+  <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/rocket_1f680.gif" width="25" height="25"/>
+</h3>
 
-> **🎯 Full automation of Bombie bot tasks**  
-> Watch as the bot intelligently completes tasks, opens chests, and collects rewards automatically
-
-<br/>
-
-<!-- Feature Badges -->
-<p>
-  <img src="https://img.shields.io/badge/✨_Automated-Tasks-blueviolet?style=for-the-badge&logoColor=white" alt="Automated Tasks">
-  <img src="https://img.shields.io/badge/🎁_Chest-Opening-purple?style=for-the-badge&logoColor=white" alt="Chest Opening">
-  <img src="https://img.shields.io/badge/⚡_Smart-Rewards-violet?style=for-the-badge&logoColor=white" alt="Smart Rewards">
-</p>
-
-<p>
-  <img src="https://img.shields.io/badge/🤖_Browser-Automation-blue?style=flat-square" alt="Browser Automation">
-  <img src="https://img.shields.io/badge/🎯_Task-Completion-success?style=flat-square" alt="Task Completion">
-  <img src="https://img.shields.io/badge/⏱️_Real--time-Processing-orange?style=flat-square" alt="Real-time">
-  <img src="https://img.shields.io/badge/🔄_Auto-Loop-red?style=flat-square" alt="Auto Loop">
-</p>
-
-</div>
+<blockquote align="left">
+  <p><b>📌 What you're seeing:</b></p>
+  <ul align="left">
+    <li>✅ Automatic task detection and completion</li>
+    <li>✅ Smart chest opening with power selection</li>
+    <li>✅ Daily rewards collection</li>
+    <li>✅ Real-time browser automation using Playwright</li>
+    <li>✅ Human-like behavior emulation</li>
+  </ul>
+</blockquote>
 
 </td>
 </tr>
@@ -61,9 +54,25 @@
 
 <br/>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+<!-- Feature Badges -->
+<p align="center">
+  <img src="https://img.shields.io/badge/✨_AUTOMATED-TASKS-blueviolet?style=for-the-badge&labelColor=1a1a2e" alt="Automated Tasks"/>
+  <img src="https://img.shields.io/badge/🎁_CHEST-OPENING-9C27B0?style=for-the-badge&labelColor=1a1a2e" alt="Chest Opening"/>
+  <img src="https://img.shields.io/badge/⚡_SMART-REWARDS-7B1FA2?style=for-the-badge&labelColor=1a1a2e" alt="Smart Rewards"/>
+</p>
 
-<br/><br/>
+<p align="center">
+  <img src="https://img.shields.io/badge/🤖_Browser_Automation-Playwright-informational?style=flat-square&logo=microsoft-edge&logoColor=white&color=4A90E2" alt="Browser Automation"/>
+  <img src="https://img.shields.io/badge/🎯_Task_Completion-Automatic-success?style=flat-square&logo=checkmarx&logoColor=white&color=00C853" alt="Task Completion"/>
+  <img src="https://img.shields.io/badge/⏱️_Processing-Real--time-orange?style=flat-square&logo=speedtest&logoColor=white&color=FF6D00" alt="Real-time"/>
+  <img src="https://img.shields.io/badge/🔄_Loop_Mode-Continuous-red?style=flat-square&logo=loop&logoColor=white&color=D32F2F" alt="Auto Loop"/>
+</p>
+
+<br/>
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,16,20,24&height=120&section=footer"/>
+
+<br/>
 
 </div>
 
