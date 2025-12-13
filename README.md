@@ -1,20 +1,4 @@
 
-<div align="center">
-  <img src="./templates/git/github_logo.webp" alt="Bombie Bot Logo" width="100%"/>
-  
-  # 🤖 BOMBIE BOT
-  ### НАША КОМАНДА [HIDDENCODE](https://t.me/hidden_coding)
-  
-  [![Static Badge](https://img.shields.io/badge/Telegram-Channel-Link?style=for-the-badge&logo=Telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/hidden_coding)
-  [![Static Badge](https://img.shields.io/badge/Telegram-Chat-yes?style=for-the-badge&logo=Telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/hidden_codding_chat)
-  [![Static Badge](https://img.shields.io/badge/Telegram-Bot%20Link-Link?style=for-the-badge&logo=Telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/catizenbot/bombie?startapp=g_1002_43630755)
-
-## [HIDDEN CODE MARKET](https://t.me/hcmarket_bot?start=referral_355876562)
-
-#### - [Paws wallet connector](https://t.me/hcmarket_bot?start=referral_355876562-project_1016)
-#### - [Premium notpixel](https://t.me/hcmarket_bot?start=referral_355876562-project_1015)
-#### - [Blum wallet connector](https://t.me/hcmarket_bot?start=referral_355876562-project_1002)
-#### - [Telegram warning up](https://t.me/hcmarket_bot?start=referral_355876562-project_1001)
 </div>
 
 <h1 align="center">⚠️ Внимание | Warning ⚠️</h1>
@@ -289,7 +273,7 @@ ver. 1.1:
 
 <div align="center">
   
-[![Связь с Разработчиком](https://img.shields.io/badge/Разработчик-Telegram-blue?style=for-the-badge&logo=telegram)](https://t.me/brahman_brahman)
+[![Связь с Разработчиком](https://img.shields.io/badge/Разработчик-Telegram-blue?style=for-the-badge&logo=telegram)](https://t.me/brahman_mev)
 [![Сообщество](https://img.shields.io/badge/Комьюнити_Сигм-Telegram-blue?style=for-the-badge&logo=telegram)](https://t.me/hidden_coding)
 
 </div>
